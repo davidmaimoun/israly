@@ -1,0 +1,348 @@
+{
+  "meta": {
+    "siteName": "Israly",
+    "tagline": "Find the perfect guide for your journey through the Holy Land"
+  },
+  "nav": {
+    "home": "Home",
+    "guides": "Guides",
+    "how": "How it works",
+    "cities": "Cities",
+    "gallery": "Gallery",
+    "plan": "Plan a visit",
+    "contact": "Contact",
+    "admin": "Pro area"
+  },
+  "hero": {
+    "eyebrow": "Directory of certified guides",
+    "titleBefore": "Discover",
+    "titleAccent": "Israel",
+    "titleAfter": "with an exceptional guide",
+    "subtitle": "Multilingual guides, hand-picked region by region.",
+    "searchCta": "Find a guide",
+    "signature": "One land, a thousand journeys"
+  },
+  "search": {
+    "languagesLabel": "Spoken languages",
+    "languagesPlaceholder": "Pick one or more languages",
+    "cityLabel": "Preferred region",
+    "regionsLabel": "Regions",
+    "nameLabel": "Guide name",
+    "namePlaceholder": "Search by name…",
+    "cityPlaceholder": "All regions",
+    "anyCity": "All regions",
+    "matchAll": "Speaks all of these",
+    "matchAny": "Speaks at least one",
+    "submit": "Search"
+  },
+  "guides": {
+    "title": "Our guides",
+    "resultsCount": "{count, plural, =0 {No guides} one {# guide} other {# guides}}",
+    "empty": "No guide matches these criteria. Try broadening your search.",
+    "viewProfile": "View profile",
+    "experience": "{years} years of experience",
+    "tours": "{count} tours",
+    "speaks": "Speaks",
+    "specializes": "Specialties",
+    "filtersTitle": "Refine your search",
+    "reviews": "{count} reviews"
+  },
+  "guide": {
+    "about": "About",
+    "gallery": "Gallery",
+    "languages": "Languages",
+    "specialties": "Specialties",
+    "city": "Region",
+    "availability": "Availability",
+    "bookTitle": "Request a booking",
+    "selectDate": "Select an available date from the calendar.",
+    "book": "Book now",
+    "bookWith": "Request a booking with {name}",
+    "bookThisTour": "Book this tour",
+    "seeDetails": "See details",
+    "hideDetails": "Hide",
+    "tours": "Tours & prices",
+    "pricing": {
+      "title": "Rates",
+      "from": "From",
+      "perPersonHour": "per person / hour",
+      "perGroup": "per group",
+      "onRequest": "On request",
+      "packages": "Tour packages"
+    }
+  },
+  "booking": {
+    "name": "Your name",
+    "email": "Your email",
+    "phone": "Phone (optional)",
+    "people": "Number of people",
+    "message": "Message (optional)",
+    "startDate": "Preferred date",
+    "endDate": "End date (optional)",
+    "submit": "Send request",
+    "success": "Request sent! The guide will get back to you shortly.",
+    "error": "Something went wrong. Please try again.",
+    "note": "No upfront payment: the guide confirms your request manually.",
+    "time": "Preferred time",
+    "preferredLang": "Preferred language (optional)",
+    "anyLang": "No preference",
+    "whatsapp": "Request by WhatsApp",
+    "tour": "Tour",
+    "tourAny": "General / to define",
+    "orSend": "or"
+  },
+  "how": {
+    "title": "How it works",
+    "step1Title": "Search",
+    "step1Text": "Filter guides by language and region in seconds.",
+    "step2Title": "Pick a date",
+    "step2Text": "Check the availability calendar and send your request.",
+    "step3Title": "Set off",
+    "step3Text": "The guide confirms, and your tailor-made experience begins."
+  },
+  "featured": {
+    "title": "Featured guides",
+    "subtitle": "A selection of our top-rated guides",
+    "cta": "See all guides"
+  },
+  "popularCities": {
+    "title": "Popular regions",
+    "subtitle": "Where our travelers go most often",
+    "seeAll": "See all regions",
+    "explore": "Explore guides"
+  },
+  "testimonials": {
+    "title": "They trusted us"
+  },
+  "contact": {
+    "title": "Got a question?",
+    "subtitle": "Our team replies quickly.",
+    "whatsapp": "Message on WhatsApp",
+    "email": "Send us an email"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "madeWith": "Crafted with care in Israel"
+  },
+  "cities": {
+    "jerusalem": "Jerusalem",
+    "tel_aviv": "Tel Aviv",
+    "haifa": "Haifa",
+    "dead_sea": "Dead Sea",
+    "galilee": "Galilee",
+    "eilat": "Eilat",
+    "nazareth": "Nazareth",
+    "masada": "Masada",
+    "negev": "Negev",
+    "golan": "Golan Heights",
+    "tiberias": "Tiberias",
+    "caesarea": "Caesarea",
+    "akko": "Acre",
+    "jaffa": "Jaffa",
+    "all": "All cities",
+    "other": "Other",
+    "desc": {
+      "jerusalem": "Holy city of three faiths",
+      "tel_aviv": "Beaches, Bauhaus and nightlife",
+      "dead_sea": "The lowest point on Earth",
+      "galilee": "Green hills and the lake",
+      "eilat": "Coral reefs on the Red Sea",
+      "nazareth": "Cradle of Christian heritage"
+    }
+  },
+  "langs": {
+    "he": "Hebrew",
+    "en": "English",
+    "fr": "French",
+    "es": "Spanish",
+    "ru": "Russian",
+    "am": "Amharic"
+  },
+  "specialties": {
+    "history": "History",
+    "desert": "Desert",
+    "food": "Food",
+    "religion": "Religion",
+    "hiking": "Hiking",
+    "photography": "Photography",
+    "archaeology": "Archaeology",
+    "wine": "Wine"
+  },
+  "common": {
+    "loading": "Loading…",
+    "back": "Back",
+    "all": "All",
+    "saving": "Saving…"
+  },
+  "admin": {
+    "login": {
+      "title": "Professional area",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "error": "Invalid credentials"
+    },
+    "nav": {
+      "profile": "My profile",
+      "calendar": "My calendar",
+      "bookings": "My requests",
+      "invoices": "My invoices",
+      "guides": "All guides",
+      "allBookings": "All bookings",
+      "allInvoices": "All invoices",
+      "logout": "Sign out"
+    },
+    "profile": {
+      "title": "My profile",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "photo": "Profile photo (URL)",
+      "phone": "Phone",
+      "email": "Email",
+      "contactNote": "Visible to staff only",
+      "notes": "Practical info (tags)",
+      "secPerso": "Personal",
+      "secAbout": "About",
+      "secPricing": "Tours & prices",
+      "secNotes": "Practical info",
+      "secGallery": "Gallery",
+      "notesHint": "Shown as tags on the profile",
+      "addNote": "Add a tag…",
+      "region": "Preferred region",
+      "languages": "Spoken languages",
+      "specialties": "Specialties",
+      "years": "Years of experience",
+      "description": "Description",
+      "descriptionHint": "Write a description per language (tabs).",
+      "photosTitle": "Photos (up to 10)",
+      "videosTitle": "Videos (up to 3)",
+      "dropPhotos": "Drag or pick photos",
+      "dropVideos": "Drag or pick videos",
+      "uploading": "Uploading…",
+      "maxReached": "Maximum reached",
+      "caption": "Caption",
+      "remove": "Remove",
+      "save": "Save",
+      "saved": "Profile saved"
+    },
+    "calendar": {
+      "title": "Availability calendar",
+      "hint": "Tap a date to cycle: available → booked → unavailable.",
+      "available": "Available",
+      "booked": "Booked",
+      "unavailable": "Unavailable"
+    },
+    "bookings": {
+      "title": "Booking requests",
+      "empty": "No requests yet.",
+      "client": "Client",
+      "people": "{count} people",
+      "dates": "Dates",
+      "status": "Status",
+      "confirm": "Confirm",
+      "decline": "Decline",
+      "complete": "Complete",
+      "noteMessage": "Message",
+      "cancel": "Cancel",
+      "pending": "Pending",
+      "editSlot": "Edit slot",
+      "amount": "Amount",
+      "save": "Save",
+      "close": "Close"
+    },
+    "adminGuides": {
+      "title": "All guides",
+      "published": "Published",
+      "back": "Back",
+      "edit": "Edit",
+      "unpublished": "Unpublished",
+      "publish": "Publish",
+      "unpublish": "Unpublish"
+    },
+    "createGuide": {
+      "title": "Create a guide",
+      "password": "Initial password",
+      "submit": "Create",
+      "created": "Guide created — you can fill the details"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled",
+      "COMPLETED": "Completed"
+    },
+    "invoices": {
+      "title": "Invoices",
+      "empty": "No invoices yet.",
+      "number": "Number",
+      "client": "Client",
+      "amount": "Amount",
+      "date": "Date",
+      "status": "Status",
+      "create": "Create invoice",
+      "createTitle": "New invoice",
+      "selectBooking": "From a booking",
+      "noBookings": "No confirmed/completed bookings.",
+      "amountLabel": "Amount",
+      "currency": "Currency",
+      "notes": "Notes",
+      "save": "Save",
+      "saved": "Invoice created",
+      "view": "View",
+      "print": "Print / PDF",
+      "markSent": "Mark as sent",
+      "markPaid": "Mark as paid",
+      "billedTo": "Billed to",
+      "issuedBy": "Issued by",
+      "tour": "Tour",
+      "fromTrip": "From a rate"
+    },
+    "invoiceStatus": {
+      "DRAFT": "Draft",
+      "SENT": "Sent",
+      "PAID": "Paid"
+    },
+    "pricing": {
+      "title": "Pricing",
+      "hint": "Set a global rate, and/or per-tour rates.",
+      "currency": "Currency",
+      "globalTitle": "Global rate",
+      "perPersonHour": "Per person / hour",
+      "perGroup": "Per group (flat)",
+      "tripsTitle": "Per-tour rates",
+      "tripsHint": "Each tour overrides the global rate.",
+      "tripLabel": "Tour name",
+      "tripPrice": "Price",
+      "tripUnit": "Unit",
+      "tripDuration": "Duration (h)",
+      "tripDetails": "Program / details (optional)",
+      "addTrip": "Add a tour",
+      "remove": "Remove",
+      "unit": {
+        "perPerson": "per person",
+        "perGroup": "per group",
+        "perHour": "per hour",
+        "perPersonHour": "per person·hour"
+      }
+    }
+  },
+  "gallery": {
+    "title": "Moments from the road",
+    "subtitle": "Photos from real tours by our guides.",
+    "openFull": "Open full gallery",
+    "byGuide": "by {name}",
+    "empty": "No photos yet.",
+    "viewGuide": "View guide"
+  },
+  "plan": {
+    "eyebrow": "Free request",
+    "title": "Plan your visit",
+    "subtitle": "Tell us what you'd like — we'll match you with the right guide and get back to you.",
+    "regions": "Regions you're interested in (optional)",
+    "langs": "Preferred languages (optional)",
+    "dateOptional": "Preferred date (optional)",
+    "proposal": "Tell us about the visit you want",
+    "submit": "Send my request"
+  }
+}

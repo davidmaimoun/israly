@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ----- Types embarqués (MongoDB composite types) -----
+
+/// Texte localisé stocké EN BASE (contenu dynamique des guides).
+type LocalizedText {
+  he String?
+  en String?
+  fr String?
+  ru String?
+  es String?
+  am String?
+  ar String?
+}
+
+/// Élément de galerie façon Insta/Pinterest : photo OU vidéo.
+type MediaItem {
+  type    String // "photo" | "video"
+  url     String
+  poster  String? // miniature pour les vidéos
+  caption String?
+}
+
+/// Tarif d'un circuit nommé : REMPLACE le tarif global pour ce trip.
+type TripPrice {
+  label    String // nom du circuit (ex: "Vieille ville — journée")
+  price    Float
+  unit     String // "perPerson" | "perGroup" | "perHour" | "perPersonHour"
+  duration Float? // durée en heures (optionnel)
+  details  String? // programme / détails du circuit (optionnel)
+}
+
+// ----- Enums -----
+
+enum Role {
+  guide
+  admin
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  BOOKED
+  UNAVAILABLE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+  CANCELLED
+  COMPLETED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+}
+
+// ----- Modèles -----
+
+model Guide {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  slug            String        @unique
+  firstName       String
+  lastName        String
+  photo           String?
+  city            String // clé de ville (libellé traduit via i18n)
+  languages       String[] // codes: he/en/fr/es/ru/ar...
+  specialties     String[] // history/desert/food/religion/hiking/photography...
+  yearsExperience Int           @default(0)
+  toursCompleted  Int           @default(0)
+  phone           String?       // contact (visible admin uniquement)
+  bio             LocalizedText
+  notes           String[]      @default([]) // infos pratiques -> pills sur le profil
+  gallery         MediaItem[] // galerie photos/vidéos
+
+  // ----- Tarifs -----
+  currency           String      @default("ILS") // ILS | USD | EUR
+  pricePerPersonHour Float? // tarif global par personne et par heure
+  pricePerGroup      Float? // tarif global forfaitaire par groupe
+  trips              TripPrice[] // tarifs par circuit (remplacent le global)
+
+  rating          Float?        // note moyenne /5 (optionnel)
+  ratingCount     Int           @default(0)
+
+  published       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+
+  availability Availability[]
+  bookings     Booking[]
+  invoices     Invoice[]
+  user         User?
+
+  @@index([city])
+  @@index([published])
+}
+
+model Availability {
+  id      String             @id @default(auto()) @map("_id") @db.ObjectId
+  guideId String             @db.ObjectId
+  guide   Guide              @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  date    DateTime
+  status  AvailabilityStatus @default(AVAILABLE)
+  note    String?
+
+  @@unique([guideId, date])
+}
+
+model Booking {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  guideId     String?       @db.ObjectId // null = demande générale (gérée par l'admin)
+  guide       Guide?        @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime?
+  clientName  String
+  clientEmail String
+  clientPhone String?
+  numPeople   Int           @default(1)
+  startTime     String? // heure souhaitée, ex "09:00"
+  preferredLang String? // langue préférée (réservation guide)
+  cities      String[]      @default([]) // régions d'intérêt (demande générale)
+  langs       String[]      @default([]) // langues souhaitées (demande générale)
+  message     String?
+  locale      String        @default("he")
+  status      BookingStatus @default(PENDING)
+  amount      Float? // champs paiement présents mais inutilisés (flux manuel)
+  paid        Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  invoices    Invoice[]
+
+  @@index([guideId, status])
+}
+
+model Invoice {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  number      String        @unique // ex: INV-2026-0007
+  guideId     String        @db.ObjectId
+  guide       Guide         @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  bookingId   String?       @db.ObjectId
+  booking     Booking?      @relation(fields: [bookingId], references: [id])
+  clientName  String
+  clientEmail String?
+  tourDate    DateTime?
+  amount      Float
+  currency    String        @default("ILS")
+  notes       String?
+  status      InvoiceStatus @default(DRAFT)
+  issuedAt    DateTime      @default(now())
+
+  @@index([guideId, status])
+}
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(guide)
+  guideId      String?  @unique @db.ObjectId
+  guide        Guide?   @relation(fields: [guideId], references: [id])
+  createdAt    DateTime @default(now())
+}

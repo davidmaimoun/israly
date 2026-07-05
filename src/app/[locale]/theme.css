@@ -1,0 +1,72 @@
+/* ============================================================
+   THÈME — MODULAIRE. Tu édites UNIQUEMENT le bloc :root ci-dessous.
+   Tout le site se retune via les rôles @theme (ne pas toucher).
+   Pour tester une autre ambiance : commente le :root actif,
+   décommente une palette alternative, recharge. C'est tout.
+   Palette active : bleu chaud + blanc cassé, sobre — esprit Israël.
+   ============================================================ */
+
+:root {
+  --raw-blue:      #2f6db0; /* primary   — bleu chaud, doux */
+  --raw-blue-deep: #214f80; /* secondary — bleu profond */
+  --raw-sky:       #8bb8dd; /* accent    — bleu ciel léger */
+  --raw-azure:     #4f93cf; /* pop bleu */
+  --raw-paper:     #fbfaf6; /* fond      — blanc cassé chaud */
+  --raw-sand:      #f1ede3; /* surface   — crème très clair */
+  --raw-line:      #e6e1d6; /* bordures  — chaud discret */
+  --raw-ink:       #1b2c3d; /* encre     — bleu nuit */
+  --raw-ink-soft:  #586b7d;
+  --raw-white:     #ffffff;
+  --raw-success:   #2e8b6f;
+  --raw-danger:    #c2433a;
+}
+
+/* ---- Palette ALTERNATIVE (sable + olive méditerranéen). À décommenter pour tester.
+:root {
+  --raw-blue:      #3f7d8c;
+  --raw-blue-deep: #2c5b66;
+  --raw-sky:       #9ec6c6;
+  --raw-azure:     #5b9aa0;
+  --raw-paper:     #fcfaf5;
+  --raw-sand:      #f1ebdd;
+  --raw-line:      #e6ddc9;
+  --raw-ink:       #243027;
+  --raw-ink-soft:  #5f6b5e;
+  --raw-white:     #ffffff;
+  --raw-success:   #2e8b6f;
+  --raw-danger:    #c2433a;
+}
+---- */
+
+/* ====== Rôles sémantiques — NE PAS éditer pour changer de couleur ====== */
+@theme {
+  --color-primary:   var(--raw-blue);
+  --color-secondary: var(--raw-blue-deep);
+  --color-accent:    var(--raw-sky);
+  --color-coral:     var(--raw-azure);
+  --color-olive:     var(--raw-azure);
+
+  --color-ink:       var(--raw-ink);
+  --color-ink-soft:  var(--raw-ink-soft);
+  --color-cream:     var(--raw-paper);
+  --color-sand:      var(--raw-sand);
+  --color-stone:     var(--raw-line);
+  --color-surface:   var(--raw-white);
+  --color-bg:        var(--raw-paper);
+
+  --color-success:   var(--raw-success);
+  --color-danger:    var(--raw-danger);
+
+  --font-display: var(--font-display-google);
+  --font-body:    var(--font-body-google);
+  --font-accent:  var(--font-accent-google);
+  --font-hebrew:  var(--font-hebrew-google);
+
+  --radius-card: 1.25rem;
+  --shadow-soft: 0 12px 40px -16px color-mix(in srgb, var(--raw-blue-deep) 22%, transparent);
+}
+
+[lang="he"] body,
+[dir="rtl"] body {
+  font-family: var(--font-hebrew), var(--font-body), sans-serif;
+}
