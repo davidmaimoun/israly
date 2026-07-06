@@ -24,6 +24,7 @@ export function PlanVisit() {
   const [pending, start] = useTransition();
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneErr, setPhoneErr] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,8 +53,9 @@ export function PlanVisit() {
   });
 
   function submit() {
-    setError(null);
-    if (!name || !email || !phone) { setError(tb("error")); return; }
+    setError(null); setPhoneErr(null);
+    if (!name || !email) { setError(tb("error")); return; }
+    if (!phone) { setPhoneErr(tb("phoneRequired")); return; }
     start(async () => {
       const res = await createTourRequest(payload());
       if (res.ok) setDone(true);
@@ -63,7 +65,8 @@ export function PlanVisit() {
 
   function sendByWhatsapp() {
     if (!OWNER_WA) return;
-    if (!name || !email || !phone) { setError(tb("error")); return; }
+    if (!name || !email) { setError(tb("error")); return; }
+    if (!phone) { setPhoneErr(tb("phoneRequired")); return; }
     const body = [
       t("title"),
       "",
@@ -101,7 +104,7 @@ export function PlanVisit() {
             <div className="grid gap-4 md:grid-cols-2">
               <F label={tb("name")} value={name} onChange={setName} required />
               <F label={tb("email")} value={email} onChange={setEmail} type="email" required />
-              <F label={tb("phone")} value={phone} onChange={setPhone} required />
+              <F label={tb("phone")} value={phone} onChange={(v) => { setPhone(v); setPhoneErr(null); }} required error={phoneErr} />
               <F label={tb("people")} value={people} onChange={setPeople} type="number" />
               <F label={t("dateOptional")} value={date} onChange={setDate} type="date" />
               <F label={tb("time")} value={time} onChange={setTime} type="time" />
@@ -139,11 +142,12 @@ export function PlanVisit() {
   );
 }
 
-function F({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
+function F({ label, value, onChange, type = "text", required, error }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; error?: string | null }) {
   return (
     <div>
       <label className="eyebrow mb-1 block">{label}{required && <span className="text-danger"> *</span>}</label>
-      <input type={type} value={value} required={required} min={type === "number" ? 1 : undefined} onChange={(e) => onChange(e.target.value)} className="h-11 w-full rounded-xl border border-stone bg-cream/50 px-3 text-sm" />
+      {error && <p className="mb-1 text-xs font-medium text-danger">{error}</p>}
+      <input type={type} value={value} required={required} min={type === "number" ? 1 : undefined} onChange={(e) => onChange(e.target.value)} className={cn("h-11 w-full rounded-xl border bg-cream/50 px-3 text-sm", error ? "border-danger" : "border-stone")} />
     </div>
   );
 }

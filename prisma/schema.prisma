@@ -52,6 +52,7 @@ enum AvailabilityStatus {
 
 enum BookingStatus {
   PENDING
+  AWAITING
   CONFIRMED
   DECLINED
   CANCELLED

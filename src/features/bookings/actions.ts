@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireUser, assertOwnsGuide, requireAdmin } from "@/lib/auth-guard";
-import { createBookingSchema, createTourRequestSchema, updateBookingStatusSchema, adminUpdateBookingSchema } from "./schema";
+import { createBookingSchema, createTourRequestSchema, updateBookingStatusSchema, adminUpdateBookingSchema, sendClientEmailSchema } from "./schema";
 import { fromDateKey, toDateKey } from "@/lib/utils";
-import { notifyAdminNewRequest, bookingConfirmationEmail, sendEmail } from "@/lib/email";
+import { notifyAdminNewRequest, sendEmail } from "@/lib/email";
+import { confirmEmail, proposeEmail } from "@/lib/email-templates";
 
 type ActionState = { ok: boolean; error?: string };
 
@@ -37,7 +38,7 @@ export async function createBooking(raw: unknown): Promise<ActionState> {
   await notifyAdminNewRequest({
     kind: "guide",
     clientName: d.clientName, clientEmail: d.clientEmail, clientPhone: d.clientPhone,
-    numPeople: d.numPeople, date: d.startDate, cities: [], message: d.message || null,
+    numPeople: d.numPeople, dateISO: d.startDate, cities: [], message: d.message || null,
   });
   revalidatePath(`/${d.locale}/admin`);
   return { ok: true };
@@ -69,7 +70,7 @@ export async function createTourRequest(raw: unknown): Promise<ActionState> {
   await notifyAdminNewRequest({
     kind: "general",
     clientName: d.clientName, clientEmail: d.clientEmail, clientPhone: d.clientPhone,
-    numPeople: d.numPeople, date: d.startDate || null, cities: d.cities, message: d.message || null,
+    numPeople: d.numPeople, dateISO: d.startDate || null, cities: d.cities, message: d.message || null,
   });
   revalidatePath(`/${d.locale}/admin`);
   return { ok: true };
@@ -133,6 +134,46 @@ export async function adminUpdateBooking(locale: string, raw: unknown): Promise<
   };
   if (d.amount !== undefined) data.amount = d.amount;
   await prisma.booking.update({ where: { id: d.bookingId }, data });
+  revalidatePath(`/${locale}/admin`);
+  return { ok: true };
+}
+
+// ADMIN — envoie un e-mail au client (confirmation avec lien de paiement, ou proposition de dates).
+export async function sendClientEmail(locale: string, raw: unknown): Promise<ActionState> {
+  await requireAdmin(locale);
+  const parsed = sendClientEmailSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Invalide" };
+  const d = parsed.data;
+  const booking = await prisma.booking.findUnique({ where: { id: d.bookingId } });
+  if (!booking) return { ok: false, error: "Réservation introuvable" };
+  const guide = booking.guideId
+    ? await prisma.guide.findUnique({ where: { id: booking.guideId }, select: { firstName: true, lastName: true, currency: true } })
+    : null;
+  const base = {
+    clientName: booking.clientName,
+    guideName: guide ? `${guide.firstName} ${guide.lastName}` : null,
+    dateISO: toDateKey(booking.startDate),
+    locale: booking.locale,
+  };
+  const mail = d.kind === "confirm"
+    ? confirmEmail({ ...base, time: booking.startTime, numPeople: booking.numPeople, amount: booking.amount ?? null, currency: guide?.currency ?? "ILS", paymentLink: d.paymentLink || undefined })
+    : proposeEmail({ ...base, altDates: d.altDates || "", note: d.note || undefined });
+  const res = await sendEmail({ to: booking.clientEmail, ...mail });
+  if (!res.ok) return { ok: false, error: res.error ?? "Échec de l'envoi" };
+
+  // Après envoi, la demande passe en "attente client" (revenable à PENDING au besoin).
+  if (booking.status === "PENDING") {
+    await prisma.booking.update({ where: { id: booking.id }, data: { status: "AWAITING" } });
+  }
+  revalidatePath(`/${locale}/admin`);
+  return { ok: true };
+}
+
+// ADMIN — supprime définitivement une demande.
+export async function deleteBooking(locale: string, bookingId: string): Promise<ActionState> {
+  await requireAdmin(locale);
+  await prisma.invoice.updateMany({ where: { bookingId }, data: { bookingId: null } });
+  await prisma.booking.delete({ where: { id: bookingId } });
   revalidatePath(`/${locale}/admin`);
   return { ok: true };
 }

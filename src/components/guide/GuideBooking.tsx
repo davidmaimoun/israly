@@ -136,6 +136,7 @@ function BookingDrawer({
   const [pending, start] = useTransition();
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneErr, setPhoneErr] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -153,8 +154,9 @@ function BookingDrawer({
     [tour ? `[${tb("tour")}: ${tour}]` : null, message].filter(Boolean).join(" ");
 
   function submit() {
-    setError(null);
-    if (!name || !email || !date || !phone) { setError(tb("error")); return; }
+    setError(null); setPhoneErr(null);
+    if (!name || !email || !date) { setError(tb("error")); return; }
+    if (!phone) { setPhoneErr(tb("phoneRequired")); return; }
     start(async () => {
       const res = await createBooking({
         guideId,
@@ -176,7 +178,8 @@ function BookingDrawer({
 
   function whatsapp() {
     if (!OWNER_WA) return;
-    if (!name || !email || !date || !phone) { setError(tb("error")); return; }
+    if (!name || !email || !date) { setError(tb("error")); return; }
+    if (!phone) { setPhoneErr(tb("phoneRequired")); return; }
     const body = [
       t("bookWith", { name: firstName }),
       "",
@@ -223,7 +226,7 @@ function BookingDrawer({
             <div className="grid gap-3">
               <Field label={tb("name")} value={name} onChange={setName} required />
               <Field label={tb("email")} value={email} onChange={setEmail} type="email" required />
-              <Field label={tb("phone")} value={phone} onChange={setPhone} required />
+              <Field label={tb("phone")} value={phone} onChange={(v) => { setPhone(v); setPhoneErr(null); }} required error={phoneErr} />
               <div className="grid grid-cols-2 gap-3">
                 <Field label={tb("startDate")} value={date} onChange={setDate} type="date" required />
                 <Field label={tb("time")} value={time} onChange={setTime} type="time" />
@@ -283,11 +286,12 @@ function BookingDrawer({
   );
 }
 
-function Field({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
+function Field({ label, value, onChange, type = "text", required, error }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; error?: string | null }) {
   return (
     <div>
       <label className="eyebrow mb-1 block">{label}{required && <span className="text-danger"> *</span>}</label>
-      <input type={type} value={value} required={required} min={type === "number" ? 1 : undefined} onChange={(e) => onChange(e.target.value)} className="h-11 w-full rounded-xl border border-stone bg-cream/50 px-3 text-sm" />
+      {error && <p className="mb-1 text-xs font-medium text-danger">{error}</p>}
+      <input type={type} value={value} required={required} min={type === "number" ? 1 : undefined} onChange={(e) => onChange(e.target.value)} className={cn("h-11 w-full rounded-xl border bg-cream/50 px-3 text-sm", error ? "border-danger" : "border-stone")} />
     </div>
   );
 }

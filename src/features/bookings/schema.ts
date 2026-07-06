@@ -16,7 +16,7 @@ export const createBookingSchema = z.object({
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
   clientName: z.string().min(2).max(80),
   clientEmail: z.string().email(),
-  clientPhone: z.string().min(6, "Téléphone requis").max(30),
+  clientPhone: z.string().min(6, "Phone number required").max(30),
   numPeople: z.coerce.number().int().min(1).max(60),
   startTime: z.string().max(10).optional().or(z.literal("")),
   preferredLang: z.string().max(5).optional().or(z.literal("")),
@@ -31,7 +31,7 @@ export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 export const createTourRequestSchema = z.object({
   clientName: z.string().min(2).max(80),
   clientEmail: z.string().email(),
-  clientPhone: z.string().min(6, "Téléphone requis").max(30),
+  clientPhone: z.string().min(6, "Phone number required").max(30),
   numPeople: z.coerce.number().int().min(1).max(60),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
   startTime: z.string().max(10).optional().or(z.literal("")),
@@ -55,4 +55,13 @@ export const adminUpdateBookingSchema = z.object({
   startTime: z.string().max(10).optional().or(z.literal("")),
   numPeople: z.coerce.number().int().min(1).max(60),
   amount: z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().min(0).max(1000000).optional()),
+});
+
+// ADMIN — envoi d'un e-mail au client (confirmer / proposer d'autres dates).
+export const sendClientEmailSchema = z.object({
+  bookingId: z.string().min(1),
+  kind: z.enum(["confirm", "propose"]),
+  paymentLink: z.string().max(500).optional().or(z.literal("")),
+  altDates: z.string().max(300).optional().or(z.literal("")),
+  note: z.string().max(1000).optional().or(z.literal("")),
 });

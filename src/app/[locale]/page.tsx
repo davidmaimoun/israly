@@ -22,11 +22,13 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const guides = await prisma.guide.findMany({
-    where: { published: true },
-    orderBy: [{ rating: "desc" }, { toursCompleted: "desc" }],
-    take: 12,
-  });
+  // Ordre équitable : aucun guide n'est privilégié (mélange aléatoire à chaque chargement).
+  const allPublished = await prisma.guide.findMany({ where: { published: true } });
+  for (let i = allPublished.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allPublished[i], allPublished[j]] = [allPublished[j], allPublished[i]];
+  }
+  const guides = allPublished.slice(0, 12);
 
   const railGuides: RailGuide[] = guides.map((g) => ({
     slug: g.slug,

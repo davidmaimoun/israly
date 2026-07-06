@@ -45,17 +45,18 @@ export function Dashboard({
   const ti = useTranslations("admin.invoices");
   const isAdmin = role === "admin";
 
+  const pendingCount = adminData?.bookings.filter((b) => b.status === "PENDING").length ?? 0;
   const tabs = isAdmin
     ? [
-        { id: "guides", label: t("guides"), icon: Users },
-        { id: "allBookings", label: t("allBookings"), icon: ListChecks },
-        { id: "allInvoices", label: t("allInvoices"), icon: Receipt },
+        { id: "allBookings", label: t("allBookings"), icon: ListChecks, badge: pendingCount },
+        { id: "guides", label: t("guides"), icon: Users, badge: 0 },
+        { id: "allInvoices", label: t("allInvoices"), icon: Receipt, badge: 0 },
       ]
     : [
-        { id: "profile", label: t("profile"), icon: User },
-        { id: "calendar", label: t("calendar"), icon: CalendarDays },
-        { id: "bookings", label: t("bookings"), icon: Inbox },
-        { id: "invoices", label: t("invoices"), icon: FileText },
+        { id: "profile", label: t("profile"), icon: User, badge: 0 },
+        { id: "calendar", label: t("calendar"), icon: CalendarDays, badge: 0 },
+        { id: "bookings", label: t("bookings"), icon: Inbox, badge: 0 },
+        { id: "invoices", label: t("invoices"), icon: FileText, badge: 0 },
       ];
 
   const [tab, setTab] = useState(tabs[0].id);
@@ -81,6 +82,9 @@ export function Dashboard({
             )}
           >
             <tb2.icon size={16} /> {tb2.label}
+            {tb2.badge > 0 && (
+              <span className="ms-1 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1.5 text-xs font-bold text-cream">{tb2.badge}</span>
+            )}
           </button>
         ))}
       </nav>

@@ -47,10 +47,13 @@ export default async function AdminPage({
             startTime: b.startTime,
             numPeople: b.numPeople,
             amount: b.amount,
+            currency: b.guide?.currency ?? "ILS",
             cities: b.cities,
             langs: b.langs,
             message: b.message,
             status: b.status,
+            locale: b.locale,
+            createdAt: b.createdAt.toISOString(),
           })),
           invoices: invoices.map((inv) => ({
             id: inv.id,

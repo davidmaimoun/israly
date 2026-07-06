@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 
 const colors: Record<string, string> = {
   PENDING: "bg-accent/25 text-secondary",
+  AWAITING: "bg-primary/15 text-primary",
   CONFIRMED: "bg-success/20 text-success",
   DECLINED: "bg-danger/15 text-danger",
   CANCELLED: "bg-stone text-ink-soft",
