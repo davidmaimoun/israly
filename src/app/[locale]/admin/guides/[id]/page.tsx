@@ -36,7 +36,7 @@ export default async function AdminGuideEditPage({
           firstName: guide.firstName,
           lastName: guide.lastName,
           photo: guide.photo ?? "",
-          city: guide.city,
+          cities: guide.cities,
           languages: guide.languages,
           specialties: guide.specialties,
           yearsExperience: guide.yearsExperience,
@@ -58,6 +58,7 @@ export default async function AdminGuideEditPage({
             unit: tr.unit as "perPerson" | "perGroup" | "perHour" | "perPersonHour",
             duration: tr.duration ?? null,
             details: tr.details ?? null,
+            itinerary: tr.itinerary ?? null,
           })),
         }}
       />

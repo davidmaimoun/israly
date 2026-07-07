@@ -4,9 +4,9 @@ import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { createBooking } from "@/features/bookings/actions";
 import { LANGUAGES } from "@/lib/languages";
-import { formatPrice, type Trip } from "@/lib/pricing";
+import { formatPrice, parseItinerary, formatDuration, type Trip } from "@/lib/pricing";
 import { Button } from "@/components/ui/Button";
-import { CalendarCheck, Loader2, X, Ticket, ChevronDown, MessageCircle, Coins } from "lucide-react";
+import { CalendarCheck, Loader2, X, Ticket, ChevronDown, MessageCircle, Coins, Clock, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/config";
 
@@ -61,7 +61,14 @@ export function GuideBooking(props: Props) {
           {trips.length > 0 && (
             <div className="grid gap-3">
               {trips.map((tr, i) => (
-                <div key={i} className="rounded-[var(--radius-card)] border border-stone/70 bg-surface p-4">
+                <div
+                  key={i}
+                  onClick={() => (tr.itinerary || tr.details) && setDetails(details === i ? null : i)}
+                  className={cn(
+                    "rounded-[var(--radius-card)] border border-stone/70 bg-surface p-4 transition-colors",
+                    (tr.itinerary || tr.details) && "cursor-pointer hover:border-primary/40",
+                  )}
+                >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-ink">{tr.label}</p>
@@ -73,25 +80,19 @@ export function GuideBooking(props: Props) {
                     </div>
                     <button
                       type="button"
-                      onClick={() => startBooking(tr.label)}
+                      onClick={(e) => { e.stopPropagation(); startBooking(tr.label); }}
                       className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-semibold text-cream hover:brightness-110"
                     >
                       <Ticket size={15} /> {t("bookThisTour")}
                     </button>
                   </div>
-                  {tr.details && (
+                  {(tr.itinerary || tr.details) && (
                     <div className="mt-2">
-                      <button
-                        type="button"
-                        onClick={() => setDetails(details === i ? null : i)}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-secondary hover:text-primary"
-                      >
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-secondary">
                         {details === i ? t("hideDetails") : t("seeDetails")}
                         <ChevronDown size={14} className={cn("transition-transform", details === i && "rotate-180")} />
-                      </button>
-                      {details === i && (
-                        <p className="mt-2 whitespace-pre-line border-s-2 border-stone ps-3 text-sm text-ink-soft">{tr.details}</p>
-                      )}
+                      </span>
+                      {details === i && <Itinerary itinerary={tr.itinerary} details={tr.details} />}
                     </div>
                   )}
                 </div>
@@ -293,5 +294,50 @@ function Field({ label, value, onChange, type = "text", required, error }: { lab
       {error && <p className="mb-1 text-xs font-medium text-danger">{error}</p>}
       <input type={type} value={value} required={required} min={type === "number" ? 1 : undefined} onChange={(e) => onChange(e.target.value)} className={cn("h-11 w-full rounded-xl border bg-cream/50 px-3 text-sm", error ? "border-danger" : "border-stone")} />
     </div>
+  );
+}
+
+
+// Programme d'un circuit : itinéraire structuré (heure/durée + label localisé),
+// avec repli sur l'ancien texte libre.
+function Itinerary({ itinerary, details }: { itinerary: string | null; details: string | null }) {
+  const locale = useLocale();
+  const stops = parseItinerary(itinerary);
+
+  if (stops.length > 0) {
+    return (
+      <ul className="mt-2 space-y-1.5 border-s-2 border-accent/40 ps-3">
+        {stops.map((s, idx) => {
+          const label = s.label[locale] || Object.values(s.label).find(Boolean) || "";
+          const key = s.mode === "time" ? s.time : formatDuration(s.durationMin);
+          return (
+            <li key={idx} className="flex gap-3 text-sm">
+              <span className="inline-flex shrink-0 items-center gap-1 font-semibold tabular-nums text-primary">
+                {s.mode === "time" ? <Clock size={13} /> : <Timer size={13} />} {key}
+              </span>
+              <span className="text-ink-soft">{label}</span>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
+
+  if (!details) return null;
+  const matches = [...details.matchAll(/(\d{1,2}[:hH.]\d{2})\s*([^]*?)(?=\s*\d{1,2}[:hH.]\d{2}|$)/g)]
+    .map((m) => ({ time: m[1].replace(/[hH.]/, ":"), label: m[2].trim() }))
+    .filter((x) => x.label);
+  if (matches.length === 0) {
+    return <p className="mt-2 whitespace-pre-line border-s-2 border-stone ps-3 text-sm text-ink-soft">{details}</p>;
+  }
+  return (
+    <ul className="mt-2 space-y-1.5 border-s-2 border-accent/40 ps-3">
+      {matches.map((it, idx) => (
+        <li key={idx} className="flex gap-3 text-sm">
+          <span className="shrink-0 font-semibold tabular-nums text-primary">{it.time}</span>
+          <span className="text-ink-soft">{it.label}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

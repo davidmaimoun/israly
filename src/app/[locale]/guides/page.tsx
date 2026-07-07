@@ -47,7 +47,7 @@ export default async function GuidesPage({
     where.languages = filters.match === "any" ? { hasSome: langs } : { hasEvery: langs };
   }
   if (cities.length) {
-    where.city = { in: [...cities, "all"] }; // un guide "toutes villes" matche toujours
+    where.cities = { hasSome: [...cities, "all"] }; // un guide "toutes régions" matche toujours
   }
   if (q) {
     where.OR = [
@@ -67,7 +67,7 @@ export default async function GuidesPage({
     rating: g.rating ?? null,
     ratingCount: g.ratingCount,
     photo: g.photo,
-    city: g.city,
+    cities: g.cities,
     languages: g.languages,
     specialties: g.specialties,
     yearsExperience: g.yearsExperience,

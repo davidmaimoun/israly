@@ -11,7 +11,7 @@ export type RailGuide = {
   slug: string;
   name: string;
   photo: string | null;
-  city: string;
+  cities: string[];
   languages: string[];
   bio: string;
 };

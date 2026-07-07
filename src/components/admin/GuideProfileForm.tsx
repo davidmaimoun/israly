@@ -10,6 +10,7 @@ import { locales, type Locale } from "@/i18n/config";
 import { MAX_PHOTOS, MAX_VIDEOS } from "@/lib/upload-limits";
 import { CURRENCIES, TRIP_UNITS, type Trip } from "@/lib/pricing";
 import { MediaUploader } from "./MediaUploader";
+import { ItineraryEditor } from "./ItineraryEditor";
 import { Button } from "@/components/ui/Button";
 import { Loader2, Check, Plus, Trash2, User, BookOpen, Wallet, Tag, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,7 @@ export type GuideFormData = {
   firstName: string;
   lastName: string;
   photo: string;
-  city: string;
+  cities: string[];
   languages: string[];
   specialties: string[];
   yearsExperience: number;
@@ -54,7 +55,7 @@ export function GuideProfileForm({ guide, isAdmin = false, email }: { guide: Gui
   const [firstName, setFirstName] = useState(guide.firstName);
   const [lastName, setLastName] = useState(guide.lastName);
   const [photo, setPhoto] = useState(guide.photo);
-  const [city, setCity] = useState(guide.city);
+  const [cities, setCities] = useState<string[]>(guide.cities);
   const [years, setYears] = useState(guide.yearsExperience);
   const [langs, setLangs] = useState<string[]>(guide.languages);
   const [specs, setSpecs] = useState<string[]>(guide.specialties);
@@ -90,12 +91,12 @@ export function GuideProfileForm({ guide, isAdmin = false, email }: { guide: Gui
     ) as Partial<Record<Locale, string>>;
     start(async () => {
       const res = await updateGuideProfile(uiLocale, guide.id, {
-        firstName, lastName, photo, city,
+        firstName, lastName, photo, cities,
         languages: langs, specialties: specs, yearsExperience: years,
         phone, bio: bioClean, notes,
         gallery: gallery.map((m) => ({ type: m.type, url: m.url, poster: m.poster || "", caption: m.caption || "" })),
         currency, pricePerPersonHour: pphInput, pricePerGroup: pgInput,
-        trips: trips.map((tr) => ({ label: tr.label, price: tr.price, unit: tr.unit, duration: tr.duration ?? "", details: tr.details ?? "" })),
+        trips: trips.map((tr) => ({ label: tr.label, price: tr.price, unit: tr.unit, duration: tr.duration ?? "", details: tr.details ?? "", itinerary: tr.itinerary ?? "" })),
       });
       if (res.ok) setSaved(true);
       else setError(res.error ?? "Erreur");
@@ -135,13 +136,13 @@ export function GuideProfileForm({ guide, isAdmin = false, email }: { guide: Gui
           <div className="grid gap-4 md:grid-cols-2">
             <L label={t("firstName")}><In value={firstName} onChange={setFirstName} /></L>
             <L label={t("lastName")}><In value={lastName} onChange={setLastName} /></L>
-            <L label={t("region")}>
-              <select value={city} onChange={(e) => setCity(e.target.value)} className="h-11 w-full rounded-xl border border-stone bg-cream/50 px-3">
-                {CITIES.map((c) => <option key={c} value={c}>{tc(c)}</option>)}
-              </select>
+            <L label={t("region")} className="md:col-span-2">
+              <Chips items={CITIES.filter((c) => c !== "all").map((c) => ({ value: c, label: tc(c) }))} selected={cities} onToggle={(v) => toggle(cities, setCities, v)} />
             </L>
             <L label={t("years")}><In type="number" value={years} onChange={(v) => setYears(Number(v))} /></L>
-            <L label={t("photo")} className="md:col-span-2"><In value={photo} onChange={setPhoto} placeholder="https://… ou /uploads/…" /></L>
+            {isAdmin && (
+          <L label={t("photo")} className="md:col-span-2"><In value={photo} onChange={setPhoto} placeholder="https://… ou /uploads/…" /></L>
+        )}
             {isAdmin && (
               <>
                 <L label={t("phone")}><In value={phone} onChange={setPhone} placeholder="+972…" /></L>
@@ -199,7 +200,7 @@ export function GuideProfileForm({ guide, isAdmin = false, email }: { guide: Gui
             <div>
               <div className="mb-1 flex items-center justify-between">
                 <label className="eyebrow">{tpr("tripsTitle")}</label>
-                <button type="button" onClick={() => setTrips([...trips, { label: "", price: 0, unit: "perGroup", duration: null, details: null }])} className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs text-white">
+                <button type="button" onClick={() => setTrips([...trips, { label: "", price: 0, unit: "perGroup", duration: null, details: null, itinerary: null }])} className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs text-white">
                   <Plus size={14} /> {tpr("addTrip")}
                 </button>
               </div>
@@ -218,7 +219,7 @@ export function GuideProfileForm({ guide, isAdmin = false, email }: { guide: Gui
                       <button type="button" onClick={() => setTrips(trips.filter((_, idx) => idx !== i))} className="grid h-10 w-10 place-items-center rounded-lg text-danger hover:bg-sand" aria-label={tpr("remove")}>
                         <Trash2 size={16} />
                       </button>
-                      <textarea value={tr.details ?? ""} onChange={(e) => set({ details: e.target.value })} placeholder={tpr("tripDetails")} rows={2} className="col-span-2 w-full rounded-lg border border-stone bg-cream/50 px-2 py-1.5 text-sm md:col-span-5" />
+                      <div className="col-span-2 md:col-span-5"><ItineraryEditor value={tr.itinerary} details={tr.details} onChange={(json) => set({ itinerary: json })} /></div>
                     </div>
                   );
                 })}

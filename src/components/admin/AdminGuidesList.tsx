@@ -7,7 +7,7 @@ import { Eye, EyeOff, Pencil } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-export type AdminGuideRow = { id: string; name: string; city: string; published: boolean };
+export type AdminGuideRow = { id: string; name: string; cities: string[]; published: boolean };
 
 export function AdminGuidesList({ guides }: { guides: AdminGuideRow[] }) {
   const locale = useLocale();
@@ -26,7 +26,7 @@ export function AdminGuidesList({ guides }: { guides: AdminGuideRow[] }) {
         <div key={g.id} className="flex items-center justify-between rounded-xl border border-stone/70 bg-surface p-3">
           <div>
             <p className="font-medium text-ink">{g.name}</p>
-            <p className="text-sm text-ink-soft">{tc(g.city)}</p>
+            <p className="text-sm text-ink-soft">{g.cities.map((c) => tc(c)).join(" · ") || "—"}</p>
           </div>
           <div className="flex items-center gap-3">
             <Link href={`/admin/guides/${g.id}`} className="inline-flex items-center gap-1 rounded-full border border-stone px-3 py-1.5 text-sm hover:bg-sand">

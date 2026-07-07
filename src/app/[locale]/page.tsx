@@ -34,7 +34,7 @@ export default async function HomePage({
     slug: g.slug,
     name: fullName(g),
     photo: g.photo,
-    city: g.city,
+    cities: g.cities,
     languages: g.languages,
     bio: localized(g.bio, locale as Locale),
   }));

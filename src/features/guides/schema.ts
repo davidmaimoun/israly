@@ -36,13 +36,14 @@ export const tripPriceSchema = z.object({
   unit: z.enum(["perPerson", "perGroup", "perHour", "perPersonHour"]),
   duration: optionalPrice,
   details: z.string().max(1500).optional().or(z.literal("")),
+  itinerary: z.string().max(8000).optional().or(z.literal("")),
 });
 
 export const guideProfileSchema = z.object({
   firstName: z.string().min(1).max(60),
   lastName: z.string().min(1).max(60),
   photo: mediaUrl.optional().or(z.literal("")),
-  city: z.enum(CITIES),
+  cities: z.array(z.enum(CITIES)).default([]),
   languages: z.array(z.enum(LANGUAGE_CODES as [string, ...string[]])).min(1),
   specialties: z.array(z.enum(SPECIALTIES)).min(1),
   yearsExperience: z.coerce.number().int().min(0).max(70),

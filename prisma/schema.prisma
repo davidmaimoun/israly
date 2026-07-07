@@ -33,8 +33,9 @@ type TripPrice {
   label    String // nom du circuit (ex: "Vieille ville — journée")
   price    Float
   unit     String // "perPerson" | "perGroup" | "perHour" | "perPersonHour"
-  duration Float? // durée en heures (optionnel)
-  details  String? // programme / détails du circuit (optionnel)
+  duration  Float? // durée en heures (optionnel)
+  details   String? // programme texte libre (fallback / legacy)
+  itinerary String? // itinéraire structuré (JSON: ItineraryStop[])
 }
 
 // ----- Enums -----
@@ -73,7 +74,7 @@ model Guide {
   firstName       String
   lastName        String
   photo           String?
-  city            String // clé de ville (libellé traduit via i18n)
+  cities          String[]      @default([]) // régions couvertes (libellés i18n)
   languages       String[] // codes: he/en/fr/es/ru/ar...
   specialties     String[] // history/desert/food/religion/hiking/photography...
   yearsExperience Int           @default(0)
@@ -100,7 +101,7 @@ model Guide {
   invoices     Invoice[]
   user         User?
 
-  @@index([city])
+  @@index([cities])
   @@index([published])
 }
 

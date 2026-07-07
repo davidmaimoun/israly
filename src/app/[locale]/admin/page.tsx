@@ -36,7 +36,7 @@ export default async function AdminPage({
         role="admin"
         guideData={null}
         adminData={{
-          guides: guides.map((g) => ({ id: g.id, name: fullName(g), city: g.city, published: g.published })),
+          guides: guides.map((g) => ({ id: g.id, name: fullName(g), cities: g.cities, published: g.published })),
           bookings: bookings.map((b) => ({
             id: b.id,
             guideName: b.guide ? fullName(b.guide) : null,
@@ -103,7 +103,7 @@ export default async function AdminPage({
           firstName: guide.firstName,
           lastName: guide.lastName,
           photo: guide.photo ?? "",
-          city: guide.city,
+          cities: guide.cities,
           languages: guide.languages,
           specialties: guide.specialties,
           yearsExperience: guide.yearsExperience,
@@ -125,6 +125,7 @@ export default async function AdminPage({
             unit: tr.unit as "perPerson" | "perGroup" | "perHour" | "perPersonHour",
             duration: tr.duration ?? null,
             details: tr.details ?? null,
+            itinerary: tr.itinerary ?? null,
           })),
         },
         availability,
