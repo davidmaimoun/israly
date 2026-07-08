@@ -19,6 +19,13 @@ function futureDates(count: number, startOffset = 2): Date[] {
 // Images placeholder FIABLES (Picsum) — à remplacer par de vraies photos.
 // La "seed" garantit une image stable et différente par guide/élément.
 const PIC = (seed: string) => `https://picsum.photos/seed/ig-${seed}/900/1100`;
+// Portraits de démo (illustratifs) — visages humains, remplaçables par l'admin.
+const PORTRAIT: Record<string, string> = {
+  "yossi-cohen": "https://i.pravatar.cc/512?img=12",
+  "marie-dubois": "https://i.pravatar.cc/512?img=45",
+  "david-levi": "https://i.pravatar.cc/512?img=51",
+  "leila-haddad": "https://i.pravatar.cc/512?img=47",
+};
 
 async function main() {
   console.log("→ Nettoyage…");
@@ -166,7 +173,7 @@ async function main() {
   for (const g of guides) {
     const { email, ...data } = g;
     const created = await prisma.guide.create({
-      data: { ...data, published: true, photo: PIC(g.slug) },
+      data: { ...data, published: true, photo: PORTRAIT[g.slug] ?? PIC(g.slug) },
     });
     await prisma.user.create({
       data: { email, passwordHash: guideHash, role: "guide", guideId: created.id },

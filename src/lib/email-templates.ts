@@ -104,3 +104,72 @@ export function adminNotifyEmail(d: { kind: "guide" | "general"; clientName: str
     </table>${d.message ? `<p style="margin:14px 0 0;color:${C.soft};font-size:14px">“${d.message}”</p>` : ""}`;
   return { subject: "Israly — nouvelle demande", html: shell(inner, "ltr") };
 }
+
+// ---- Recrutement des guides (FR / EN / HE) ----
+export type RecruitInput = { firstName: string; lang: "fr" | "en" | "he" };
+
+const RE: Record<"fr" | "en" | "he", {
+  subject: string; hi: (n: string) => string; intro: string; handles: string;
+  founding: string; bullets: string[]; split: string; terms: string; cta: string; bye: string;
+}> = {
+  fr: {
+    subject: "Israly — devenez guide fondateur",
+    hi: (n) => `Bonjour ${n},`,
+    intro: "Je lance Israly, une nouvelle plateforme qui met en relation des guides locaux licenciés en Israël avec des voyageurs du monde entier (français, anglais, hébreu, russe, espagnol…).",
+    handles: "L'idée est simple : vous vous concentrez sur ce que vous faites de mieux — guider — et Israly s'occupe du reste : une page de profil soignée, la mise en avant, les réservations, le paiement sécurisé et le support client.",
+    founding: "La plateforme ouvre dans environ un mois, et je cherche quelques guides fondateurs pour démarrer. Être parmi les premiers, c'est :",
+    bullets: ["une mise en avant privilégiée sur le site", "un accompagnement pour créer votre profil (je m'occupe même de la présentation et des photos)", "aucun frais d'inscription"],
+    split: "Le principe est transparent : vous recevez 90 % du montant de chaque réservation, et Israly prend 10 % pour la plateforme, la promotion et le paiement.",
+    terms: "Les conditions — dont une protection en cas d'annulation de dernière minute — sont détaillées dans le document joint.",
+    cta: "Si l'idée vous intéresse, répondez-moi avec vos langues, vos régions et vos types de circuits, et je vous prépare votre profil.",
+    bye: "Au plaisir d'échanger,",
+  },
+  en: {
+    subject: "Israly — become a founding guide",
+    hi: (n) => `Hi ${n},`,
+    intro: "I'm launching Israly, a new platform that connects licensed local guides in Israel with travelers from around the world (English, French, Hebrew, Russian, Spanish…).",
+    handles: "The idea is simple: you focus on what you do best — guiding — and Israly handles the rest: a polished profile page, promotion, bookings, secure payment, and customer support.",
+    founding: "The platform opens in about a month, and I'm looking for a few founding guides to start with. Being among the first means:",
+    bullets: ["priority visibility on the site", "help setting up your profile (I even take care of the layout and photos)", "no sign-up fees"],
+    split: "The terms are transparent: you receive 90% of every booking, and Israly keeps 10% for the platform, promotion, and payment handling.",
+    terms: "The full terms — including protection against last-minute cancellations — are in the attached document.",
+    cta: "If this sounds interesting, reply with your languages, regions, and the kinds of tours you offer, and I'll set up your profile.",
+    bye: "Looking forward to it,",
+  },
+  he: {
+    subject: "Israly — הצטרפו כמדריכים מייסדים",
+    hi: (n) => `שלום ${n},`,
+    intro: "אני משיק את Israly, פלטפורמה חדשה שמחברת בין מדריכי טיולים מורשים בישראל לבין מטיילים מכל העולם (אנגלית, צרפתית, עברית, רוסית, ספרדית…).",
+    handles: "הרעיון פשוט: אתם מתמקדים במה שאתם עושים הכי טוב — להדריך — ו-Israly דואגת לכל השאר: עמוד פרופיל מוקפד, קידום, הזמנות, תשלום מאובטח ותמיכה בלקוחות.",
+    founding: "הפלטפורמה נפתחת בעוד כחודש, ואני מחפש כמה מדריכים מייסדים להתחלה. להיות בין הראשונים זה אומר:",
+    bullets: ["חשיפה מועדפת באתר", "ליווי בהקמת הפרופיל (אני דואג גם לעיצוב ולתמונות)", "ללא דמי הצטרפות"],
+    split: "התנאים שקופים: אתם מקבלים 90% מכל הזמנה, ו-Israly גובה 10% עבור הפלטפורמה, הקידום והתשלום.",
+    terms: "התנאים המלאים — כולל הגנה מפני ביטולים ברגע האחרון — מפורטים במסמך המצורף.",
+    cta: "אם זה מעניין אתכם, השיבו עם השפות, האזורים וסוגי הסיורים שלכם, ואקים לכם פרופיל.",
+    bye: "בשמחה,",
+  },
+};
+
+export function recruitmentEmail(d: RecruitInput): { subject: string; html: string } {
+  const t = RE[d.lang] ?? RE.en;
+  const dir = d.lang === "he" ? "rtl" : "ltr";
+  const bullets = t.bullets.map((b) => `<li style="margin:2px 0;color:${C.ink};font-size:14px">${b}</li>`).join("");
+  const inner = `
+    <p style="margin:0 0 6px;font-size:16px">${t.hi(d.firstName || "")}</p>
+    <p style="margin:0 0 14px;font-size:15px;color:${C.soft}">${t.intro}</p>
+    <p style="margin:0 0 14px;font-size:14px;color:${C.ink}">${t.handles}</p>
+    <p style="margin:0 0 6px;font-size:14px;color:${C.ink}">${t.founding}</p>
+    <ul style="margin:0 0 14px;padding-${dir === "rtl" ? "right" : "left"}:18px">${bullets}</ul>
+    <div style="border:1px solid ${C.line};border-radius:12px;padding:12px 16px;background:${C.paper};margin-bottom:14px">
+      <p style="margin:0;font-weight:bold;color:${C.deep};font-size:14px">${t.split}</p>
+    </div>
+    <p style="margin:0 0 14px;font-size:14px;color:${C.soft}">${t.terms}</p>
+    <p style="margin:0 0 18px;font-size:14px;color:${C.ink}">${t.cta}</p>
+    <p style="margin:0;color:${C.ink};font-size:14px">${t.bye}<br>David — Israly</p>`;
+  return { subject: t.subject, html: shell(inner, dir) };
+}
+
+export function recruitmentText(d: RecruitInput): string {
+  const t = RE[d.lang] ?? RE.en;
+  return [t.hi(d.firstName || ""), "", t.intro, "", t.handles, "", t.founding, ...t.bullets.map((b) => `• ${b}`), "", t.split, "", t.terms, "", t.cta, "", t.bye, "David — Israly"].join("\n");
+}

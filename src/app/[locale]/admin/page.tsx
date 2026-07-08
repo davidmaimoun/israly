@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth-guard";
 import { Dashboard } from "@/components/admin/Dashboard";
+import { LogoutButton } from "@/components/admin/LogoutButton";
 import { toDateKey, fullName } from "@/lib/utils";
 import type { Locale } from "@/i18n/config";
 
@@ -21,12 +22,12 @@ export default async function AdminPage({
       prisma.guide.findMany({ orderBy: { lastName: "asc" } }),
       prisma.booking.findMany({
         orderBy: { createdAt: "desc" },
-        include: { guide: { select: { firstName: true, lastName: true } } },
+        include: { guide: { select: { firstName: true, lastName: true, currency: true } } },
         take: 100,
       }),
       prisma.invoice.findMany({
         orderBy: { issuedAt: "desc" },
-        include: { guide: { select: { firstName: true, lastName: true } } },
+        include: { guide: { select: { firstName: true, lastName: true, currency: true } } },
         take: 100,
       }),
     ]);
@@ -87,7 +88,16 @@ export default async function AdminPage({
     },
   });
   if (!guide) {
-    return <div className="grid min-h-screen place-items-center px-5">Profil introuvable.</div>;
+    // Session obsolète (ex. après un re-seed : l'ID du guide a changé). On invite à se reconnecter.
+    return (
+      <div className="grid min-h-screen place-items-center px-5">
+        <div className="max-w-sm rounded-[var(--radius-card)] border border-stone/70 bg-surface p-6 text-center">
+          <p className="mb-1 font-semibold text-ink">Session expirée</p>
+          <p className="mb-4 text-sm text-ink-soft">Ton profil n'a pas été trouvé (la base a peut-être été rechargée). Reconnecte-toi pour continuer.</p>
+          <LogoutButton />
+        </div>
+      </div>
+    );
   }
 
   const availability: Record<string, "AVAILABLE" | "BOOKED" | "UNAVAILABLE"> = {};

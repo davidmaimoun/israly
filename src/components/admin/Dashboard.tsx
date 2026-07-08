@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Compass, User, CalendarDays, Inbox, Users, ListChecks, FileText, Receipt } from "lucide-react";
+import { Compass, User, CalendarDays, Inbox, Users, ListChecks, FileText, Receipt, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
 import { GuideProfileForm, type GuideFormData } from "./GuideProfileForm";
@@ -11,6 +11,7 @@ import { CalendarManager } from "./CalendarManager";
 import { BookingsManager, type BookingRow } from "./BookingsManager";
 import { InvoicesManager, type InvoiceRow, type BookingOption } from "./InvoicesManager";
 import { CreateGuideForm } from "./CreateGuideForm";
+import { RecruitPanel } from "./RecruitPanel";
 import { AdminGuidesList, type AdminGuideRow } from "./AdminGuidesList";
 import { AdminBookingsList, type AdminBookingRow } from "./AdminBookingsList";
 import { AdminInvoicesList, type AdminInvoiceRow } from "./AdminInvoicesList";
@@ -50,6 +51,7 @@ export function Dashboard({
     ? [
         { id: "allBookings", label: t("allBookings"), icon: ListChecks, badge: pendingCount },
         { id: "guides", label: t("guides"), icon: Users, badge: 0 },
+        { id: "recruit", label: t("recruit"), icon: Megaphone, badge: 0 },
         { id: "allInvoices", label: t("allInvoices"), icon: Receipt, badge: 0 },
       ]
     : [
@@ -120,6 +122,8 @@ export function Dashboard({
             />
           </>
         )}
+        {isAdmin && tab === "recruit" && <RecruitPanel />}
+
         {isAdmin && adminData && tab === "guides" && (
           <>
             <CreateGuideForm />

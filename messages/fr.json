@@ -190,6 +190,7 @@
       "invoices": "Mes factures",
       "guides": "Tous les guides",
       "allBookings": "Toutes les réservations",
+      "recruit": "Recrutement",
       "allInvoices": "Toutes les factures",
       "logout": "Déconnexion"
     },
@@ -303,6 +304,13 @@
       "deleteConfirm": "Supprimer définitivement cette demande ?",
       "section": "Envoyer un e-mail au client",
       "hide": "Masquer"
+    },
+    "recruit": {
+      "title": "Envoyer un e-mail de recrutement",
+      "to": "E-mail du guide",
+      "firstName": "Prénom (optionnel)",
+      "language": "Langue de l'e-mail",
+      "hint": "Joins le document des conditions manuellement dans ta messagerie"
     },
     "invoices": {
       "title": "Factures",

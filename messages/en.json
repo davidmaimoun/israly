@@ -190,6 +190,7 @@
       "invoices": "My invoices",
       "guides": "All guides",
       "allBookings": "All bookings",
+      "recruit": "Recruitment",
       "allInvoices": "All invoices",
       "logout": "Sign out"
     },
@@ -303,6 +304,13 @@
       "deleteConfirm": "Delete this request permanently?",
       "section": "Email the client",
       "hide": "Hide"
+    },
+    "recruit": {
+      "title": "Send a recruitment email",
+      "to": "Guide email",
+      "firstName": "First name (optional)",
+      "language": "Email language",
+      "hint": "Attach the terms document manually in your mail app"
     },
     "invoices": {
       "title": "Invoices",

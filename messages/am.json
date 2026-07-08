@@ -190,6 +190,7 @@
       "invoices": "የእኔ ደረሰኞች",
       "guides": "ሁሉም መሪዎች",
       "allBookings": "ሁሉም ቦታ ማስያዣዎች",
+      "recruit": "ምልመላ",
       "allInvoices": "ሁሉም ደረሰኞች",
       "logout": "ውጣ"
     },
@@ -303,6 +304,13 @@
       "deleteConfirm": "ይህን ጥያቄ በቋሚነት ይሰረዝ?",
       "section": "ለደንበኛ ኢሜይል",
       "hide": "ደብቅ"
+    },
+    "recruit": {
+      "title": "የምልመላ ኢሜይል",
+      "to": "የመሪ ኢሜይል",
+      "firstName": "ስም (አማራጭ)",
+      "language": "የኢሜይል ቋንቋ",
+      "hint": "የውሎች ሰነዱን በእጅ ያያይዙ"
     },
     "invoices": {
       "title": "ደረሰኞች",

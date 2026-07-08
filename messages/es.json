@@ -190,6 +190,7 @@
       "invoices": "Mis facturas",
       "guides": "Todos los guías",
       "allBookings": "Todas las reservas",
+      "recruit": "Reclutamiento",
       "allInvoices": "Todas las facturas",
       "logout": "Salir"
     },
@@ -303,6 +304,13 @@
       "deleteConfirm": "¿Eliminar esta solicitud?",
       "section": "Enviar email al cliente",
       "hide": "Ocultar"
+    },
+    "recruit": {
+      "title": "Correo de reclutamiento",
+      "to": "Email del guía",
+      "firstName": "Nombre (opcional)",
+      "language": "Idioma del correo",
+      "hint": "Adjunta el documento de condiciones manualmente"
     },
     "invoices": {
       "title": "Facturas",
