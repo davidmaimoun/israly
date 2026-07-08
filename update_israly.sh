@@ -13,9 +13,10 @@ if [ "$(id -u)" = "0" ]; then
   exit 1
 fi
 
-# Charger nvm (Node 22 est installé via nvm pour l'utilisateur israly)
-export NVM_DIR="$HOME/.nvm"
+
+export NVM_DIR="/home/israly/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm use 22 >/dev/null 2>&1 || nvm use default >/dev/null 2>&1
 
 cd "$APP_DIR"
 echo "▶ Mise à jour d'Israly ($BRANCH)"
