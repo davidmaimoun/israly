@@ -21,7 +21,7 @@ export function CreateGuideForm() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [city, setCity] = useState(CITIES[1] ?? "jerusalem");
+  const [city, setCity] = useState<string>("jerusalem");
 
   function submit() {
     setError(null);

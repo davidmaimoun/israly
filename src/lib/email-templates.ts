@@ -28,6 +28,8 @@ function shell(inner: string, dir: "rtl" | "ltr"): string {
 }
 const rowHtml = (label: string, value: string) =>
   `<tr><td style="padding:6px 0;color:${C.soft};font-size:14px">${label}</td><td style="padding:6px 0;color:${C.ink};font-size:14px;font-weight:bold" align="right">${value}</td></tr>`;
+const btn = (href: string, label: string) =>
+  `<a href="${href}" style="display:inline-block;background:${C.blue};color:#fff;text-decoration:none;font-weight:bold;padding:12px 24px;border-radius:10px;font-size:14px">${label}</a>`;
 
 const T = {
   hi: { he: "שלום", en: "Hi", fr: "Bonjour", ru: "Здравствуйте", es: "Hola", am: "ሰላም" },

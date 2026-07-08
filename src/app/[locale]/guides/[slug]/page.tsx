@@ -8,7 +8,7 @@ import {
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Gallery } from "@/components/ui/Gallery";
+import { Gallery, MediaItem } from "@/components/ui/Gallery";
 import { LanguageFlags } from "@/components/ui/LanguageFlags";
 import { GuideBooking } from "@/components/guide/GuideBooking";
 import { localized, fullName } from "@/lib/utils";
@@ -118,7 +118,8 @@ export default async function GuideProfilePage({
         {guide.gallery.length > 0 && (
           <section className="mt-12">
             <h2 className="display mb-4 text-2xl">{t("gallery")}</h2>
-            <Gallery items={guide.gallery} />
+            <Gallery items={guide.gallery as MediaItem[]} />
+
           </section>
         )}
       </main>

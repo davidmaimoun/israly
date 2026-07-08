@@ -49,7 +49,7 @@ export function CalendarManager({
     <div>
       <p className="mb-3 text-sm text-ink-soft">{t("hint")}</p>
       <DayPicker
-        locale={dpLocales[locale]}
+        locale={dpLocales[locale as keyof typeof dpLocales] ?? dpLocales.en}
         dir={locale === "he" ? "rtl" : "ltr"}
         onDayClick={onDayClick}
         modifiers={{
