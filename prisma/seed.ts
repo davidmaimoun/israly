@@ -40,6 +40,7 @@ async function main() {
   const guides = [
     {
       slug: "yossi-cohen",
+      photo: "/img/guides/yossi-cohen.webp",
       firstName: "Yossi",
       lastName: "Cohen",
       cities: ["jerusalem", "dead_sea"],
@@ -73,6 +74,7 @@ async function main() {
     },
     {
       slug: "marie-dubois",
+      photo: "/img/guides/marie-dubois.webp",
       firstName: "Marie",
       lastName: "Dubois",
       cities: ["tel_aviv", "jaffa"],
@@ -103,6 +105,7 @@ async function main() {
     },
     {
       slug: "david-levi",
+      photo: "/img/guides/david-levi.webp",
       firstName: "David",
       lastName: "Levi",
       cities: ["dead_sea", "masada", "negev"],
@@ -134,6 +137,7 @@ async function main() {
     },
     {
       slug: "leila-haddad",
+      photo: "/img/guides/leila-haddad.webp",
       firstName: "Leila",
       lastName: "Haddad",
       cities: ["akko", "haifa"],
@@ -165,9 +169,9 @@ async function main() {
   const guideHash = await bcrypt.hash("guide1234", 10);
 
   for (const g of guides) {
-    const { email, ...data } = g;
+    const { email, photo, ...data } = g;
     const created = await prisma.guide.create({
-      data: { ...data, published: true, photo: `/img/guides/${g.slug}.jpg` },
+      data: { ...data, published: true, photo: photo ?? `/img/guides/${g.slug}.jpg` },
     });
     await prisma.user.create({
       data: { email, passwordHash: guideHash, role: "guide", guideId: created.id },
