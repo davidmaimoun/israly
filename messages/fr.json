@@ -33,7 +33,11 @@
     "anyCity": "Toutes les régions",
     "matchAll": "Parle toutes ces langues",
     "matchAny": "Parle au moins une",
-    "submit": "Rechercher"
+    "submit": "Rechercher",
+    "filtersLabel": "Filtres",
+    "title": "Filtrer les guides",
+    "apply": "Voir les résultats",
+    "clear": "Effacer"
   },
   "guides": {
     "title": "Nos guides",

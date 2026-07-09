@@ -21,9 +21,9 @@ export function Hero() {
           <Image src={HERO_IMAGE} alt="Israël" fill priority sizes="100vw" className="object-cover" />
         )}
         {/* Desktop : voile bien opaque sous le texte -> transparent à droite */}
-        <div className="absolute inset-0 hidden bg-gradient-to-r from-bg from-38% via-bg/85 via-60% to-transparent md:block rtl:bg-gradient-to-l" />
+        <div className="absolute inset-0 hidden bg-gradient-to-r from-bg from-8% via-bg/55 via-58% to-transparent md:block rtl:bg-gradient-to-l" />
         {/* Mobile : voile homogène */}
-        <div className="absolute inset-0 bg-gradient-to-b from-bg/90 via-bg/80 to-bg/90 md:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-b from-bg/85 via-bg/45 to-bg/80 md:hidden" />
       </div>
 
       {/* Contenu pleine largeur avec padding */}

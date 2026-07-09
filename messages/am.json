@@ -33,7 +33,11 @@
     "anyCity": "ሁሉም ክልሎች",
     "matchAll": "ሁሉንም ይናገራል",
     "matchAny": "ቢያንስ አንዱን",
-    "submit": "ፈልግ"
+    "submit": "ፈልግ",
+    "filtersLabel": "ማጣሪያ",
+    "title": "መሪዎችን አጣራ",
+    "apply": "ውጤቶችን አሳይ",
+    "clear": "አጽዳ"
   },
   "guides": {
     "title": "መሪዎቻችን",

@@ -33,7 +33,11 @@
     "anyCity": "All regions",
     "matchAll": "Speaks all of these",
     "matchAny": "Speaks at least one",
-    "submit": "Search"
+    "submit": "Search",
+    "filtersLabel": "Filters",
+    "title": "Filter guides",
+    "apply": "Show results",
+    "clear": "Clear"
   },
   "guides": {
     "title": "Our guides",
