@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Search, Check, X, SlidersHorizontal } from "lucide-react";
@@ -33,6 +34,8 @@ export function SearchBar({
   const [cities, setCities] = useState<string[]>(initialCities);
   const [matchAll, setMatchAll] = useState(initialMatch !== "any");
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const activeCount = langs.length + cities.length;
   const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
@@ -57,7 +60,7 @@ export function SearchBar({
   return (
     <>
       {/* Barre unifiée : nom · filtres · rechercher, tout dans une seule pilule */}
-      <div className="flex items-center gap-1 rounded-full border border-stone/60 bg-surface/95 p-1.5 shadow-[var(--shadow-soft)] backdrop-blur">
+      <div className="flex select-none items-center gap-1 rounded-full border border-stone/60 bg-surface/95 p-1.5 shadow-[var(--shadow-soft)] backdrop-blur">
         <div className="relative flex-1">
           <Search size={16} className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ink-soft" />
           <input
@@ -87,7 +90,8 @@ export function SearchBar({
         </Button>
       </div>
 
-      {/* Panneau de filtres qui glisse depuis le bord */}
+      {/* Panneau de filtres qui glisse — rendu via portail dans <body> pour échapper au transform du Hero */}
+      {mounted && createPortal(
       <div className={cn("fixed inset-0 z-[60]", open ? "" : "pointer-events-none")} aria-hidden={!open}>
         <div
           className={cn("absolute inset-0 bg-ink/40 backdrop-blur-sm transition-opacity duration-300", open ? "opacity-100" : "opacity-0")}
@@ -124,7 +128,9 @@ export function SearchBar({
             <Button size="lg" onClick={submit} className="ms-auto h-12 px-6"><Search size={16} /> {t("apply")}</Button>
           </div>
         </aside>
-      </div>
+      </div>,
+      document.body,
+      )}
     </>
   );
 }

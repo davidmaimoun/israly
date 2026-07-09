@@ -11,7 +11,7 @@ import { Send, Loader2, CalendarCheck, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/config";
 
-const HERO_IMAGE = process.env.NEXT_PUBLIC_HERO_IMAGE || "/img/kotel.jpg";
+const PLAN_IMAGE = process.env.NEXT_PUBLIC_PLAN_IMAGE || "/img/plan.webp";
 const OWNER_WA = (process.env.NEXT_PUBLIC_WHATSAPP || "").replace(/[^\d]/g, "");
 const REGIONS = CITIES.filter((c) => c !== "all" && c !== "other");
 
@@ -85,7 +85,7 @@ export function PlanVisit() {
   return (
     <section id="plan" className="relative scroll-mt-20 overflow-hidden py-16 md:py-24">
       {/* Fond parallax : la photo du hero, fixe au scroll, en fondu */}
-      <div className="absolute inset-0 bg-cover bg-center bg-fixed" style={{ backgroundImage: `url(${HERO_IMAGE})` }} />
+      <div className="absolute inset-0 bg-cover bg-center bg-fixed" style={{ backgroundImage: `url(${PLAN_IMAGE})` }} />
       <div className="absolute inset-0 bg-bg/92" />
       <div className="relative z-10 mx-auto max-w-3xl px-4 md:px-6">
         <div className="mb-8 text-center">
