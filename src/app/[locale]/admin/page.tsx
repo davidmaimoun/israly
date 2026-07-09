@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { Info } from "lucide-react";
-import { setRequestLocale, getTranslations, getMessages } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/layout/Header";
@@ -11,6 +11,7 @@ import { guideSearchSchema } from "@/features/guides/schema";
 import { LANGUAGE_CODES } from "@/lib/languages";
 import { CITIES } from "@/lib/cities";
 import { fullName } from "@/lib/utils";
+import { searchGuides } from "@/lib/guide-search";
 
 export default async function GuidesPage({
   params,
@@ -50,26 +51,13 @@ export default async function GuidesPage({
   if (cities.length) {
     where.cities = { hasSome: [...cities, "all"] }; // un guide "toutes régions" matche toujours
   }
-  if (q) {
-    // Recherche large : nom, mais aussi langue ou région (via leurs libellés traduits).
-    const messages = await getMessages();
-    const ql = q.toLowerCase();
-    const langObj = (messages.langs ?? {}) as Record<string, string>;
-    const cityObj = (messages.cities ?? {}) as Record<string, string>;
-    const matchedLangs = Object.entries(langObj).filter(([, l]) => typeof l === "string" && l.toLowerCase().includes(ql)).map(([code]) => code);
-    const matchedCities = Object.entries(cityObj).filter(([k, l]) => k !== "all" && typeof l === "string" && l.toLowerCase().includes(ql)).map(([k]) => k);
-    where.OR = [
-      { firstName: { contains: q, mode: "insensitive" } },
-      { lastName: { contains: q, mode: "insensitive" } },
-      ...(matchedLangs.length ? [{ languages: { hasSome: matchedLangs } }] : []),
-      ...(matchedCities.length ? [{ cities: { hasSome: matchedCities } }] : []),
-    ];
-  }
-
-  const guides = await prisma.guide.findMany({
+  // Filtres stricts (langues/régions) en base ; la recherche libre `q` est appliquée
+  // ensuite en mémoire (fuzzy multi-mots : nom, langue, région, fautes tolérées).
+  const found = await prisma.guide.findMany({
     where,
     orderBy: { toursCompleted: "desc" },
   });
+  const guides = q ? searchGuides(found, q) : found;
 
   const cards: GuideCardData[] = guides.map((g) => ({
     slug: g.slug,

@@ -5,13 +5,11 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { GuideFilters } from "@/components/ui/GuideFilters";
 import { GuideCard, type GuideCardData } from "@/components/ui/GuideCard";
 import { guideSearchSchema } from "@/features/guides/schema";
 import { LANGUAGE_CODES } from "@/lib/languages";
 import { CITIES } from "@/lib/cities";
 import { fullName } from "@/lib/utils";
-import { searchGuides } from "@/lib/guide-search";
 
 export default async function GuidesPage({
   params,
@@ -51,13 +49,17 @@ export default async function GuidesPage({
   if (cities.length) {
     where.cities = { hasSome: [...cities, "all"] }; // un guide "toutes régions" matche toujours
   }
-  // Filtres stricts (langues/régions) en base ; la recherche libre `q` est appliquée
-  // ensuite en mémoire (fuzzy multi-mots : nom, langue, région, fautes tolérées).
-  const found = await prisma.guide.findMany({
+  if (q) {
+    where.OR = [
+      { firstName: { contains: q, mode: "insensitive" } },
+      { lastName: { contains: q, mode: "insensitive" } },
+    ];
+  }
+
+  const guides = await prisma.guide.findMany({
     where,
     orderBy: { toursCompleted: "desc" },
   });
-  const guides = q ? searchGuides(found, q) : found;
 
   const cards: GuideCardData[] = guides.map((g) => ({
     slug: g.slug,
@@ -84,14 +86,14 @@ export default async function GuidesPage({
           <span>{t("demoNotice")}</span>
         </div>
 
-        <div className="mb-8">
-          <GuideFilters
+        {/* <div className="mb-8">
+          <SearchBar
+            initialName={q}
             initialLangs={langs}
             initialCities={cities}
-            initialName={q}
             initialMatch={filters.match}
           />
-        </div>
+        </div> */}
 
         {cards.length === 0 ? (
           <div className="rounded-[var(--radius-card)] border border-dashed border-stone bg-surface p-12 text-center text-ink-soft">
