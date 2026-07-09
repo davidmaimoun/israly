@@ -167,7 +167,7 @@ async function main() {
   for (const g of guides) {
     const { email, ...data } = g;
     const created = await prisma.guide.create({
-      data: { ...data, published: true, photo: `/img/guides/${g.slug}.png` },
+      data: { ...data, published: true, photo: `/img/guides/${g.slug}.jpg` },
     });
     await prisma.user.create({
       data: { email, passwordHash: guideHash, role: "guide", guideId: created.id },
