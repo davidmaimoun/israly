@@ -5,7 +5,6 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { SearchBar } from "@/components/ui/SearchBar";
 import { GuideCard, type GuideCardData } from "@/components/ui/GuideCard";
 import { guideSearchSchema } from "@/features/guides/schema";
 import { LANGUAGE_CODES } from "@/lib/languages";
@@ -87,14 +86,14 @@ export default async function GuidesPage({
           <span>{t("demoNotice")}</span>
         </div>
 
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <SearchBar
             initialName={q}
             initialLangs={langs}
             initialCities={cities}
             initialMatch={filters.match}
           />
-        </div>
+        </div> */}
 
         {cards.length === 0 ? (
           <div className="rounded-[var(--radius-card)] border border-dashed border-stone bg-surface p-12 text-center text-ink-soft">
