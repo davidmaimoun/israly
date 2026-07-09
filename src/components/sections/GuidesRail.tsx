@@ -37,9 +37,9 @@ export function GuidesRail({ guides }: { guides: RailGuide[] }) {
         {guides.map((g) => (
           <article
             key={g.slug}
-            className="group flex w-[260px] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--radius-card)] border border-stone/60 bg-surface transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)] sm:w-[280px]"
+            className="group flex w-65 shrink-0 snap-start flex-col overflow-hidden rounded-card border border-stone/60 bg-surface transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)] sm:w-[280px]"
           >
-            <Link href={`/guides/${g.slug}`} className="relative block aspect-[5/4] overflow-hidden">
+            <Link href={`/guides/${g.slug}`} className="relative block aspect-5/4 overflow-hidden">
               <Image
                 src={g.photo || "/img/guide-placeholder.jpg"}
                 alt={g.name}
