@@ -5,7 +5,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { Reveal } from "@/components/ui/Reveal";
 
 const HERO_VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO || "";
-const HERO_IMAGE = process.env.NEXT_PUBLIC_HERO_IMAGE || "/img/kotel.jpg";
+const HERO_IMAGE = process.env.NEXT_PUBLIC_HERO_IMAGE || "/img/hero.webp";
 
 export function Hero() {
   const t = useTranslations("hero");
