@@ -47,9 +47,12 @@ export function Header() {
       className={cn(
         "inset-x-0 top-0 z-40 border-b transition-all duration-300",
         isHome ? "fixed" : "sticky",
+        // Mobile : toujours blanc (évite le clignotement dû à la barre d'adresse qui apparaît/disparaît).
+        "border-stone/40 bg-white shadow-sm",
+        // Desktop : transparent en haut du hero -> verre dépoli au scroll.
         onDark
-          ? "border-transparent bg-transparent"
-          : "border-stone/40 bg-white/85 shadow-sm backdrop-blur-md",
+          ? "md:border-transparent md:bg-transparent md:shadow-none"
+          : "md:border-stone/40 md:bg-white/85 md:shadow-sm md:backdrop-blur-md",
       )}
     >
       {/* Barre fine décorative en haut */}
@@ -88,8 +91,8 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
-          <LanguageSwitcher onDark={onDark} />
-          <button onClick={() => setOpen((v) => !v)} aria-label="Menu" className={cn("p-1", onDark && "text-cream")}>
+          <LanguageSwitcher onDark={false} />
+          <button onClick={() => setOpen((v) => !v)} aria-label="Menu" className="p-1 text-ink">
             {open ? <X /> : <Menu />}
           </button>
         </div>
