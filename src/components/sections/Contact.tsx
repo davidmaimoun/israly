@@ -12,18 +12,18 @@ export function Contact() {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="display text-3xl md:text-4xl">{t("title")}</h2>
           <p className="mt-3 text-cream/85">{t("subtitle")}</p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <a
               href={`https://wa.me/${wa}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-cream px-6 font-semibold text-secondary hover:brightness-95"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cream px-6 font-semibold text-secondary hover:brightness-95 sm:w-auto"
             >
               <MessageCircle size={18} /> {t("whatsapp")}
             </a>
             <a
               href="mailto:contact@example.com"
-              className="inline-flex h-12 items-center gap-2 rounded-full border border-cream/40 px-6 font-semibold text-cream hover:bg-cream/10"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-cream/40 px-6 font-semibold text-cream hover:bg-cream/10 sm:w-auto"
             >
               <Mail size={18} /> {t("email")}
             </a>

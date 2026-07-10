@@ -1,13 +1,13 @@
 "use client";
 
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { createTourRequest } from "@/features/bookings/actions";
 import { CITIES } from "@/lib/cities";
 import { LANGUAGES } from "@/lib/languages";
 import { Button } from "@/components/ui/Button";
-import { Send, Loader2, CalendarCheck, MessageCircle } from "lucide-react";
+import { Send, Loader2, CalendarCheck, MessageCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/config";
 
@@ -110,8 +110,14 @@ export function PlanVisit() {
               <F label={tb("time")} value={time} onChange={setTime} type="time" />
             </div>
 
-            <Chips label={t("regions")} items={REGIONS.map((c) => ({ value: c, label: tc(c) }))} selected={cities} onToggle={(v) => toggle(cities, setCities, v)} />
-            <Chips label={t("langs")} items={LANGUAGES.map((l) => ({ value: l.code, label: `${l.flag} ${tl(l.code)}` }))} selected={langs} onToggle={(v) => toggle(langs, setLangs, v)} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <PlanDropdown label={t("regions")} placeholder={t("choose")} count={cities.length}>
+                <Chips items={REGIONS.map((c) => ({ value: c, label: tc(c) }))} selected={cities} onToggle={(v) => toggle(cities, setCities, v)} />
+              </PlanDropdown>
+              <PlanDropdown label={t("langs")} placeholder={t("choose")} count={langs.length}>
+                <Chips items={LANGUAGES.map((l) => ({ value: l.code, label: `${l.flag} ${tl(l.code)}` }))} selected={langs} onToggle={(v) => toggle(langs, setLangs, v)} />
+              </PlanDropdown>
+            </div>
 
             <div>
               <label className="eyebrow mb-1 block">{t("proposal")}</label>
@@ -121,7 +127,7 @@ export function PlanVisit() {
             {error && <p className="text-sm text-danger">{error}</p>}
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button onClick={submit} size="lg" disabled={pending} className="flex-1">
+              <Button onClick={submit} size="lg" disabled={pending} className="w-full sm:flex-1">
                 {pending ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
                 {t("submit")}
               </Button>
@@ -129,7 +135,7 @@ export function PlanVisit() {
                 <button
                   type="button"
                   onClick={sendByWhatsapp}
-                  className="inline-flex h-14 flex-1 items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 text-base font-semibold text-white"
+                  className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 text-base font-semibold text-white sm:flex-1"
                 >
                   <MessageCircle size={18} /> {tb("whatsapp")}
                 </button>
@@ -151,10 +157,9 @@ function F({ label, value, onChange, type = "text", required, error }: { label: 
     </div>
   );
 }
-function Chips({ label, items, selected, onToggle }: { label: string; items: { value: string; label: string }[]; selected: string[]; onToggle: (v: string) => void }) {
+function Chips({ items, selected, onToggle }: { items: { value: string; label: string }[]; selected: string[]; onToggle: (v: string) => void }) {
   return (
     <div>
-      <label className="eyebrow mb-1 block">{label}</label>
       <div className="flex flex-wrap gap-2">
         {items.map((it) => {
           const on = selected.includes(it.value);
@@ -165,6 +170,30 @@ function Chips({ label, items, selected, onToggle }: { label: string; items: { v
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function PlanDropdown({ label, placeholder, count, children }: { label: string; placeholder: string; count: number; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+  return (
+    <div ref={ref} className="relative">
+      <label className="eyebrow mb-1 block">{label}</label>
+      <button type="button" onClick={() => setOpen((v) => !v)} className={cn("flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-cream/50 px-3 text-sm", count ? "border-primary text-primary" : "border-stone text-ink-soft")}>
+        <span>{count > 0 ? `${count}` : placeholder}</span>
+        <ChevronDown size={16} className={cn("transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-stone bg-surface p-3 shadow-[var(--shadow-soft)]">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

@@ -106,6 +106,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .blob { animation: none; }
 }
+/* Mobile : blobs statiques (l'animation + blur saccade le scroll). */
+@media (max-width: 768px) {
+  .blob { animation: none; }
+}
 
 /* Hébreu : titres + mot accentué en police hébraïque (Heebo).
    Fraunces/Caveat n'ont pas de glyphes hébreux -> "ישראל" rendait minuscule. */
