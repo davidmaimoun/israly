@@ -8,7 +8,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 // Préserve le chemin courant en changeant uniquement la locale.
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ onDark = false }: { onDark?: boolean }) {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
@@ -18,7 +18,10 @@ export function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 rounded-full border border-stone px-3 py-1.5 text-sm hover:bg-sand"
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+          onDark ? "border-white/50 text-white hover:bg-white/15" : "border-stone text-ink hover:bg-sand",
+        )}
         aria-label="Change language"
       >
         <Globe size={16} />

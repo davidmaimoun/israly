@@ -62,10 +62,11 @@ export function HScroll({ children, pad = false, gapClass = "gap-4" }: { childre
           "flex snap-x snap-mandatory overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
           gapClass,
           fits ? "justify-center" : "",
-          pad && "px-4 md:px-6",
+          pad && "px-5 md:px-8 scroll-px-5 md:scroll-px-8",
         )}
       >
         {children}
+        {pad && <span aria-hidden className="w-1 shrink-0" />}
       </div>
       {canNext && (
         <button

@@ -32,19 +32,15 @@ export function HowItWorks() {
   const lineDelay = (i: number) => 300 + i * 600;
 
   return (
-    <section id="how" className="relative scroll-mt-20 overflow-hidden bg-secondary/[0.10] py-14 md:py-20">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--color-secondary) 1px, transparent 1px), linear-gradient(90deg, var(--color-secondary) 1px, transparent 1px)",
-          backgroundSize: "36px 36px",
-          opacity: 0.06,
-          maskImage: "radial-gradient(ellipse at center, black 40%, transparent 85%)",
-          WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 85%)",
-        }}
-      />
+    <section id="how" className="relative scroll-mt-20 overflow-hidden bg-gradient-to-b from-cream via-surface to-cream py-14 md:py-20">
+      {/* Ambiance douce : halo central + blobs colorés flottants et floutés */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="blob absolute left-1/2 top-1/2 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 bg-accent/10" />
+        <div className="blob absolute -left-24 top-8 h-72 w-72 bg-primary/15" />
+        <div className="blob absolute -right-20 bottom-4 h-80 w-80 bg-secondary/15" style={{ animationDelay: "-6s" }} />
+        <div className="blob absolute left-2/3 top-1/4 h-56 w-56 bg-accent/20" style={{ animationDelay: "-3s" }} />
+      </div>
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-stone/50 to-transparent" />
       <div ref={ref} className="relative z-10 mx-auto max-w-5xl px-4 md:px-6">
         <h2 className="display mb-14 text-center text-3xl md:text-4xl">{t("title")}</h2>
 

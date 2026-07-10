@@ -1,111 +1,67 @@
 export const dynamic = "force-dynamic";
-import { Info } from "lucide-react";
+import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { GuideFilters } from "@/components/ui/GuideFilters";
-import { GuideCard, type GuideCardData } from "@/components/ui/GuideCard";
-import { guideSearchSchema } from "@/features/guides/schema";
-import { LANGUAGE_CODES } from "@/lib/languages";
-import { CITIES } from "@/lib/cities";
-import { fullName } from "@/lib/utils";
-import { searchGuides } from "@/lib/guide-search";
+import { requireAdmin } from "@/lib/auth-guard";
+import { Link } from "@/i18n/navigation";
+import { ArrowLeft } from "lucide-react";
+import { GuideProfileForm } from "@/components/admin/GuideProfileForm";
+import type { Locale } from "@/i18n/config";
 
-export default async function GuidesPage({
+export default async function AdminGuideEditPage({
   params,
-  searchParams,
 }: {
-  params: Promise<{ locale: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
-  const { locale } = await params;
+  const { locale, id } = await params;
   setRequestLocale(locale);
-  const sp = await searchParams;
-  const t = await getTranslations("guides");
+  await requireAdmin(locale);
+  const t = await getTranslations("admin.adminGuides");
 
-  const parsed = guideSearchSchema.safeParse({
-    lang: typeof sp.lang === "string" ? sp.lang : undefined,
-    cities: typeof sp.cities === "string" ? sp.cities : (typeof sp.city === "string" ? sp.city : undefined),
-    q: typeof sp.q === "string" ? sp.q : undefined,
-    match: typeof sp.match === "string" ? sp.match : "all",
-  });
-
-  const filters = parsed.success ? parsed.data : { match: "all" as const };
-  const langs = (filters.lang ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter((s) => LANGUAGE_CODES.includes(s as (typeof LANGUAGE_CODES)[number]));
-  const cities = (filters.cities ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter((s) => (CITIES as readonly string[]).includes(s) && s !== "all" && s !== "other");
-  const q = (filters.q ?? "").trim();
-
-  // Query Prisma : langues (toutes/au moins une), villes (in, + guides "all"), nom.
-  const where: Prisma.GuideWhereInput = { published: true };
-  if (langs.length) {
-    where.languages = filters.match === "any" ? { hasSome: langs } : { hasEvery: langs };
-  }
-  if (cities.length) {
-    where.cities = { hasSome: [...cities, "all"] }; // un guide "toutes régions" matche toujours
-  }
-  // Filtres stricts (langues/régions) en base ; la recherche libre `q` est appliquée
-  // ensuite en mémoire (fuzzy multi-mots : nom, langue, région, fautes tolérées).
-  const found = await prisma.guide.findMany({
-    where,
-    orderBy: { toursCompleted: "desc" },
-  });
-  const guides = q ? searchGuides(found, q) : found;
-
-  const cards: GuideCardData[] = guides.map((g) => ({
-    slug: g.slug,
-    name: fullName(g),
-    rating: g.rating ?? null,
-    ratingCount: g.ratingCount,
-    photo: g.photo,
-    cities: g.cities,
-    languages: g.languages,
-    specialties: g.specialties,
-    yearsExperience: g.yearsExperience,
-    toursCompleted: g.toursCompleted,
-  }));
+  const guide = await prisma.guide.findUnique({ where: { id } });
+  if (!guide) notFound();
+  const user = await prisma.user.findFirst({ where: { guideId: id }, select: { email: true } });
 
   return (
-    <>
-      <Header />
-      <main className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-16">
-        <h1 className="display mb-2 text-3xl md:text-4xl">{t("title")}</h1>
-        <p className="mb-4 text-ink-soft">{t("resultsCount", { count: cards.length })}</p>
-
-        <div className="mb-6 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm text-ink-soft">
-          <Info size={16} className="mt-0.5 shrink-0 text-primary" />
-          <span>{t("demoNotice")}</span>
-        </div>
-
-        <div className="mb-8">
-          <GuideFilters
-            initialLangs={langs}
-            initialCities={cities}
-            initialName={q}
-            initialMatch={filters.match}
-          />
-        </div>
-
-        {cards.length === 0 ? (
-          <div className="rounded-[var(--radius-card)] border border-dashed border-stone bg-surface p-12 text-center text-ink-soft">
-            {t("empty")}
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map((g) => (
-              <GuideCard key={g.slug} guide={g} />
-            ))}
-          </div>
-        )}
-      </main>
-      <Footer />
-    </>
+    <main className="mx-auto max-w-4xl px-4 py-10 md:px-6">
+      <Link href="/admin" className="mb-6 inline-flex items-center gap-1.5 text-sm text-ink-soft hover:text-primary">
+        <ArrowLeft size={16} className="rtl:rotate-180" /> {t("back")}
+      </Link>
+      <h1 className="display mb-6 text-2xl">{guide.firstName} {guide.lastName}</h1>
+      <GuideProfileForm
+        isAdmin
+        email={user?.email}
+        guide={{
+          id: guide.id,
+          firstName: guide.firstName,
+          lastName: guide.lastName,
+          photo: guide.photo ?? "",
+          cities: guide.cities,
+          languages: guide.languages,
+          specialties: guide.specialties,
+          yearsExperience: guide.yearsExperience,
+          phone: guide.phone ?? "",
+          notes: guide.notes,
+          bio: (guide.bio ?? {}) as Partial<Record<Locale, string>>,
+          gallery: guide.gallery.map((m) => ({
+            type: m.type as "photo" | "video",
+            url: m.url,
+            poster: m.poster ?? "",
+            caption: m.caption ?? "",
+          })),
+          currency: guide.currency,
+          pricePerPersonHour: guide.pricePerPersonHour,
+          pricePerGroup: guide.pricePerGroup,
+          trips: guide.trips.map((tr) => ({
+            label: tr.label,
+            price: tr.price,
+            unit: tr.unit as "perPerson" | "perGroup" | "perHour" | "perPersonHour",
+            duration: tr.duration ?? null,
+            details: tr.details ?? null,
+            itinerary: tr.itinerary ?? null,
+          })),
+        }}
+      />
+    </main>
   );
 }

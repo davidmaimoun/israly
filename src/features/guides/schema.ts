@@ -43,7 +43,7 @@ export const guideProfileSchema = z.object({
   firstName: z.string().min(1).max(60),
   lastName: z.string().min(1).max(60),
   photo: mediaUrl.optional().or(z.literal("")),
-  cities: z.array(z.enum(CITIES)).default([]),
+  cities: z.array(z.string().trim().min(1).max(60)).default([]), // régions connues OU lieux précis libres
   languages: z.array(z.enum(LANGUAGE_CODES as [string, ...string[]])).min(1),
   specialties: z.array(z.enum(SPECIALTIES)).min(1),
   yearsExperience: z.coerce.number().int().min(0).max(70),

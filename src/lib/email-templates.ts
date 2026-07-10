@@ -172,7 +172,6 @@ const RE: Record<"fr" | "en" | "he", {
   },
 };
 
-
 function esc(t: string) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 export function recruitmentEmail(d: RecruitInput): { subject: string; html: string } {
@@ -205,7 +204,6 @@ export function recruitmentEmail(d: RecruitInput): { subject: string; html: stri
     <p style="margin:0;color:${C.ink};font-size:14px">${t.bye}<br>David — Israly</p>`;
   return { subject: t.subject, html: shell(inner, dir) };
 }
-
 
 export function recruitmentText(d: RecruitInput): string {
   const t = RE[d.lang] ?? RE.en;

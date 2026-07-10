@@ -75,7 +75,7 @@ export function searchGuides<T extends Searchable>(guides: T[], q: string): T[] 
       ...words(g.firstName),
       ...words(g.lastName),
       ...g.languages.flatMap((c) => (LANG_LABELS[c] ?? []).flatMap(words)),
-      ...g.cities.flatMap((k) => (CITY_LABELS[k] ?? []).flatMap(words)),
+      ...g.cities.flatMap((k) => [k, ...(CITY_LABELS[k] ?? [])].flatMap(words)),
     ];
     let score = 0;
     for (const tk of tokens) if (tokenMatches(tk, hay)) score++;

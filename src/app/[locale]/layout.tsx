@@ -1,21 +1,26 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Fraunces, Inter, Caveat, Rubik } from "next/font/google";
+import { Fraunces, Poppins, Space_Mono, Caveat, Rubik } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { dir } from "@/i18n/config";
 import "../globals.css";
 
 // Display moderne + corps lisible + accent caractériel + hébreu compatible.
 const display = Fraunces({ subsets: ["latin"], variable: "--font-display-google", weight: ["600", "700"] });
-const body = Inter({ subsets: ["latin"], variable: "--font-body-google" });
+const body = Poppins({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"], variable: "--font-body-google" });
+const mono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono-google" });
 const accent = Caveat({ subsets: ["latin"], variable: "--font-accent-google", weight: ["600", "700"] });
 const hebrew = Rubik({ subsets: ["hebrew", "latin"], weight: ["300", "400", "500", "600", "700", "800", "900"], variable: "--font-hebrew-google", display: "swap" });
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
+
+export const viewport: Viewport = {
+  themeColor: "#2f6db0",
+};
 
 export async function generateMetadata({
   params,
@@ -42,7 +47,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir={dir(locale)}
-      className={`${display.variable} ${body.variable} ${accent.variable} ${hebrew.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${accent.variable} ${hebrew.variable}`}
     >
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>

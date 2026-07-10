@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { updateGuideProfile } from "@/features/guides/actions";
 import { LANGUAGES } from "@/lib/languages";
-import { CITIES } from "@/lib/cities";
+import { CITIES, isCity } from "@/lib/cities";
 import { SPECIALTIES } from "@/lib/specialties";
 import { locales, type Locale } from "@/i18n/config";
 import { MAX_PHOTOS, MAX_VIDEOS } from "@/lib/upload-limits";
@@ -56,6 +56,12 @@ export function GuideProfileForm({ guide, isAdmin = false, email }: { guide: Gui
   const [lastName, setLastName] = useState(guide.lastName);
   const [photo, setPhoto] = useState(guide.photo);
   const [cities, setCities] = useState<string[]>(guide.cities);
+  const [placeInput, setPlaceInput] = useState("");
+  const addPlace = () => {
+    const v = placeInput.trim();
+    if (v && !cities.includes(v)) setCities([...cities, v]);
+    setPlaceInput("");
+  };
   const [years, setYears] = useState(guide.yearsExperience);
   const [langs, setLangs] = useState<string[]>(guide.languages);
   const [specs, setSpecs] = useState<string[]>(guide.specialties);
@@ -138,6 +144,30 @@ export function GuideProfileForm({ guide, isAdmin = false, email }: { guide: Gui
             <L label={t("lastName")}><In value={lastName} onChange={setLastName} /></L>
             <L label={t("region")} className="md:col-span-2">
               <Chips items={CITIES.filter((c) => c !== "all").map((c) => ({ value: c, label: tc(c) }))} selected={cities} onToggle={(v) => toggle(cities, setCities, v)} />
+              <div className="mt-3">
+                <div className="flex gap-2">
+                  <input
+                    value={placeInput}
+                    onChange={(e) => setPlaceInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addPlace(); } }}
+                    placeholder={t("customPlaceHint")}
+                    className="h-10 flex-1 rounded-xl border border-stone bg-surface px-3 text-sm"
+                  />
+                  <button type="button" onClick={addPlace} className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-cream hover:brightness-110">
+                    {t("customPlace")}
+                  </button>
+                </div>
+                {cities.filter((c) => !isCity(c)).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {cities.filter((c) => !isCity(c)).map((c) => (
+                      <span key={c} className="inline-flex items-center gap-1.5 rounded-full border border-primary bg-primary/10 px-3 py-1 text-sm text-primary">
+                        {c}
+                        <button type="button" onClick={() => setCities(cities.filter((x) => x !== c))} aria-label="remove" className="leading-none hover:opacity-70">×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </L>
             <L label={t("years")}><In type="number" value={years} onChange={(v) => setYears(Number(v))} /></L>
             {isAdmin && (

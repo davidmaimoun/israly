@@ -60,6 +60,7 @@
   --font-display: var(--font-display-google);
   --font-body:    var(--font-body-google);
   --font-accent:  var(--font-accent-google);
+  --font-mono:    var(--font-mono-google), "Courier New", monospace;
   --font-hebrew:  var(--font-hebrew-google);
 
   --radius-card: 1.25rem;

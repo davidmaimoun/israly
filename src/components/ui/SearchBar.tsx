@@ -25,7 +25,15 @@ export function SearchBar() {
   const [matchAll, setMatchAll] = useState(true);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia("(max-width: 640px)");
+    const on = () => setIsMobile(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
 
   const activeCount = langs.length + cities.length;
   const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
@@ -56,7 +64,7 @@ export function SearchBar() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submit()}
-            placeholder={t("broadPlaceholder")}
+            placeholder={isMobile ? t("shortPlaceholder") : t("broadPlaceholder")}
             className="h-12 w-full rounded-full bg-transparent ps-11 pe-2 text-sm text-ink outline-none placeholder:text-ink-soft/70"
           />
         </div>

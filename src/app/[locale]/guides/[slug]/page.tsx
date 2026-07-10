@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
+import { isCity } from "@/lib/cities";
 import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
@@ -8,7 +9,7 @@ import {
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Gallery, MediaItem } from "@/components/ui/Gallery";
+import { Gallery, type MediaItem } from "@/components/ui/Gallery";
 import { LanguageFlags } from "@/components/ui/LanguageFlags";
 import { GuideBooking } from "@/components/guide/GuideBooking";
 import { localized, fullName } from "@/lib/utils";
@@ -67,7 +68,7 @@ export default async function GuideProfilePage({
               <h1 className="display text-3xl md:text-4xl">{name}</h1>
               <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-ink-soft sm:justify-start">
                 {guide.cities.length > 0 && (
-                  <span className="flex items-center gap-1.5"><MapPin size={15} className="text-primary" /> {guide.cities.map((c) => tc(c)).join(" · ")}</span>
+                  <span className="flex items-center gap-1.5"><MapPin size={15} className="text-primary" /> {guide.cities.map((c) => (isCity(c) ? tc(c) : c)).join(" · ")}</span>
                 )}
                 <span className="flex items-center gap-1.5"><Award size={15} className="text-primary" /> {tg("experience", { years: guide.yearsExperience })}</span>
                 <span className="flex items-center gap-1.5"><Users size={15} className="text-primary" /> {tg("tours", { count: guide.toursCompleted })}</span>
@@ -119,7 +120,6 @@ export default async function GuideProfilePage({
           <section className="mt-12">
             <h2 className="display mb-4 text-2xl">{t("gallery")}</h2>
             <Gallery items={guide.gallery as MediaItem[]} />
-
           </section>
         )}
       </main>
