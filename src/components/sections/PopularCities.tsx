@@ -6,7 +6,16 @@ import { Link } from "@/i18n/navigation";
 import { MapPin, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const FEATURED_CITIES = ["jerusalem", "tel_aviv", "dead_sea", "galilee", "eilat", "nazareth"] as const;
+// Villes vedettes : nom de clé (i18n) + image. Modifie l'image ici (ex. "/img/cities/jerusalem.webp").
+const FEATURED_CITIES = [
+  { key: "galilee", img: "/img/cities/galilee.webp" },
+  { key: "akko", img: "/img/cities/acre.webp" },
+  { key: "nazareth", img: "/img/cities/nazareth.webp" },
+  { key: "tel_aviv", img: "/img/cities/telaviv.webp" },
+  { key: "jerusalem", img: "/img/cities/jerusalem.webp" },
+  { key: "dead_sea", img: "/img/cities/deadsea.webp" },
+  { key: "eilat", img: "/img/cities/eilat.webp" },
+] as const;
 
 export function PopularCities() {
   const t = useTranslations("popularCities");
@@ -138,19 +147,19 @@ export function PopularCities() {
 
         {/* Lignes pleine largeur (photos collées au bord de l'écran) */}
         <div className="flex w-full flex-col">
-          {FEATURED_CITIES.map((city, i) => {
+          {FEATURED_CITIES.map((c, i) => {
             const flip = i % 2 === 1;
             const visible = inView[i];
             const revealPhoto = visible ? "opacity-100 translate-x-0" : cn("opacity-0", flip ? "translate-x-10" : "-translate-x-10");
             const revealText = visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6";
             return (
               <div
-                key={city}
+                key={c.key}
                 ref={(el) => { rowEls.current[i] = el; }}
                 className="relative grid items-stretch md:grid-cols-2"
               >
                 <div className={cn("relative aspect-[16/10] overflow-hidden transition-all duration-[800ms] ease-out md:aspect-auto md:h-80", revealPhoto, flip && "md:order-2")}>
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" style={{ backgroundImage: `url(https://picsum.photos/seed/ig-city-${city}/1000/700)` }} />
+                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" style={{ backgroundImage: `url(${c.img})` }} />
                   <div className={cn("absolute inset-0 from-transparent to-cream", flip ? "bg-gradient-to-l" : "bg-gradient-to-r")} />
                   <div className="absolute inset-0 bg-gradient-to-t from-cream/70 to-transparent md:hidden" />
                 </div>
@@ -159,9 +168,9 @@ export function PopularCities() {
                   style={{ transitionDelay: visible ? "140ms" : "0ms" }}
                   className={cn("flex flex-col justify-center px-6 py-8 transition-all duration-700 ease-out md:px-14 md:py-0", revealText, flip ? "items-start md:order-1 md:items-end md:text-right" : "items-start")}
                 >
-                  <h3 className="display text-3xl md:text-4xl">{tc(city)}</h3>
-                  <p className="mt-3 max-w-md text-ink-soft">{tc(`desc.${city}`)}</p>
-                  <Link href={`/guides?cities=${city}`} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-accent/35">
+                  <h3 className="display text-3xl md:text-4xl">{tc(c.key)}</h3>
+                  <p className="mt-3 max-w-md text-ink-soft">{tc(`desc.${c.key}`)}</p>
+                  <Link href={`/guides?cities=${c.key}`} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-accent/35">
                     <Compass size={15} /> {t("explore")}
                   </Link>
                 </div>
