@@ -52,7 +52,8 @@
     "speaks": "דובר",
     "specializes": "התמחויות",
     "filtersTitle": "דיוק החיפוש",
-    "reviews": "{count} ביקורות"
+    "reviews": "{count} ביקורות",
+    "fallbackNotice": "עדיין אין מדריך לאזור הזה — הנה כל המדריכים שלנו שיעזרו לך לבחור."
   },
   "guide": {
     "about": "אודות",

@@ -52,7 +52,8 @@
     "speaks": "Parle",
     "specializes": "Spécialités",
     "filtersTitle": "Affiner la recherche",
-    "reviews": "{count} avis"
+    "reviews": "{count} avis",
+    "fallbackNotice": "Aucun guide ne couvre encore cette région — voici tous nos guides pour vous aider à choisir."
   },
   "guide": {
     "about": "À propos",

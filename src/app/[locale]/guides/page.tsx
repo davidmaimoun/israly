@@ -43,7 +43,8 @@ export default async function GuidesPage({
     .filter((s) => (CITIES as readonly string[]).includes(s) && s !== "all" && s !== "other");
   const q = (filters.q ?? "").trim();
 
-  // Query Prisma : langues (toutes/au moins une), villes (in, + guides "all"), nom.
+  // Filtres stricts (langues/régions) en base ; la recherche libre `q` est appliquée
+  // ensuite en mémoire (fuzzy multi-mots : nom, langue, région, fautes tolérées).
   const where: Prisma.GuideWhereInput = { published: true };
   if (langs.length) {
     where.languages = filters.match === "any" ? { hasSome: langs } : { hasEvery: langs };
@@ -51,13 +52,23 @@ export default async function GuidesPage({
   if (cities.length) {
     where.cities = { hasSome: [...cities, "all"] }; // un guide "toutes régions" matche toujours
   }
-  // Filtres stricts (langues/régions) en base ; la recherche libre `q` est appliquée
-  // ensuite en mémoire (fuzzy multi-mots : nom, langue, région, fautes tolérées).
+
   const found = await prisma.guide.findMany({
     where,
     orderBy: { toursCompleted: "desc" },
   });
-  const guides = q ? searchGuides(found, q) : found;
+  let guides = q ? searchGuides(found, q) : found;
+
+  // Aucun guide pour ce filtre -> on montre TOUS les guides + un message discret,
+  // pour que le client puisse choisir plutôt que de tomber sur une page vide.
+  const hasFilter = langs.length > 0 || cities.length > 0 || q.length > 0;
+  const fellBack = guides.length === 0 && hasFilter;
+  if (fellBack) {
+    guides = await prisma.guide.findMany({
+      where: { published: true },
+      orderBy: { toursCompleted: "desc" },
+    });
+  }
 
   const cards: GuideCardData[] = guides.map((g) => ({
     slug: g.slug,
@@ -92,6 +103,13 @@ export default async function GuidesPage({
             initialMatch={filters.match}
           />
         </div>
+
+        {fellBack && (
+          <div className="mb-6 flex items-start gap-2 rounded-xl border border-accent/30 bg-accent/[0.08] px-4 py-3 text-sm text-ink-soft">
+            <Info size={16} className="mt-0.5 shrink-0 text-secondary" />
+            <span>{t("fallbackNotice")}</span>
+          </div>
+        )}
 
         {cards.length === 0 ? (
           <div className="rounded-[var(--radius-card)] border border-dashed border-stone bg-surface p-12 text-center text-ink-soft">
