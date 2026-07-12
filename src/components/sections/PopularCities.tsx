@@ -23,6 +23,7 @@ export function PopularCities() {
 
   const rowsRef = useRef<HTMLDivElement>(null);
   const rowEls = useRef<(HTMLDivElement | null)[]>([]);
+  const photoEls = useRef<(HTMLDivElement | null)[]>([]);
   const [w, setW] = useState(0);
   const [h, setH] = useState(0);
   const [ys, setYs] = useState<number[]>([]);
@@ -36,7 +37,7 @@ export function PopularCities() {
       const cr = cont.getBoundingClientRect();
       setW(cr.width);
       setH(cr.height);
-      setYs(rowEls.current.map((el) => (el ? el.getBoundingClientRect().top - cr.top + el.getBoundingClientRect().height / 2 : 0)));
+      setYs(photoEls.current.map((el) => (el ? el.getBoundingClientRect().top - cr.top + el.getBoundingClientRect().height / 2 : 0)));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -158,7 +159,7 @@ export function PopularCities() {
                 ref={(el) => { rowEls.current[i] = el; }}
                 className="relative grid items-stretch md:grid-cols-2"
               >
-                <div className={cn("relative aspect-[16/10] overflow-hidden transition-all duration-[800ms] ease-out md:aspect-auto md:h-80", revealPhoto, flip && "md:order-2")}>
+                <div ref={(el) => { photoEls.current[i] = el; }} className={cn("relative aspect-[16/10] overflow-hidden transition-all duration-[800ms] ease-out md:aspect-auto md:h-80", revealPhoto, flip && "md:order-2")}>
                   <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" style={{ backgroundImage: `url(${c.img})` }} />
                   <div className={cn("absolute inset-0 from-transparent to-cream", flip ? "bg-gradient-to-l" : "bg-gradient-to-r")} />
                   <div className="absolute inset-0 bg-gradient-to-t from-cream/70 to-transparent md:hidden" />
