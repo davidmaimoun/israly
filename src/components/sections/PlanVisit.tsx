@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Send, Loader2, CalendarCheck, MessageCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/config";
+import { WhatsAppIcon } from "../ui/WhatsAppIcon";
 
 const PLAN_IMAGE = process.env.NEXT_PUBLIC_PLAN_IMAGE || "/img/plan.webp";
 const OWNER_WA = (process.env.NEXT_PUBLIC_WHATSAPP || "").replace(/[^\d]/g, "");
@@ -137,7 +138,7 @@ export function PlanVisit() {
                   onClick={sendByWhatsapp}
                   className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 text-base font-semibold text-white sm:flex-1"
                 >
-                  <MessageCircle size={18} /> {tb("whatsapp")}
+                  <WhatsAppIcon size={20} /> {tb("whatsapp")}
                 </button>
               )}
             </div>
