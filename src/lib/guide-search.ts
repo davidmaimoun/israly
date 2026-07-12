@@ -7,10 +7,24 @@ import ru from "../../messages/ru.json";
 import es from "../../messages/es.json";
 import am from "../../messages/am.json";
 
+// ————————————————————————————————————————————————————————————
+// Réglages (ajuste ici si trop strict / trop permissif)
+const REQUIRE_ALL = true; // exiger que TOUS les mots de la requête matchent (recherche "ET")
+// Tolérance de fautes selon la longueur du mot : court = 0 faute, moyen = 1, long = 2.
+const fuzzyThreshold = (len: number) => (len <= 5 ? 1 : len <= 8 ? 2 : 3);
+// Alias / abréviations -> ajoutés au « sac de mots » du guide concerné.
+const CITY_ALIASES: Record<string, string[]> = {
+  jerusalem: ["jlm", "yerushalayim", "quds"],
+  tel_aviv: ["tlv", "telaviv"],
+  dead_sea: ["deadsea"],
+  golan: ["golan"],
+  sea_of_galilee: ["kinneret"],
+};
+// ————————————————————————————————————————————————————————————
+
 type Dict = { langs?: Record<string, string>; cities?: Record<string, string> };
 const ALL = [he, en, fr, ru, es, am] as unknown as Dict[];
 
-// code langue -> tous ses libellés (toutes langues) ; idem clés de région.
 const LANG_LABELS: Record<string, string[]> = {};
 const CITY_LABELS: Record<string, string[]> = {};
 for (const d of ALL) {
@@ -37,9 +51,8 @@ function words(s: string): string[] {
 function lev(a: string, b: string): number {
   const m = a.length, n = b.length;
   if (Math.abs(m - n) > 3) return 99;
-  const prev = new Array(n + 1);
+  const prev = [...Array(n + 1).keys()];
   const cur = new Array(n + 1);
-  for (let j = 0; j <= n; j++) prev[j] = j;
   for (let i = 1; i <= m; i++) {
     cur[0] = i;
     for (let j = 1; j <= n; j++) {
@@ -51,19 +64,30 @@ function lev(a: string, b: string): number {
   return prev[n];
 }
 
-// Un token de recherche matche-t-il un des mots du guide (sous-chaîne ou faute légère) ?
-function tokenMatches(token: string, hay: string[]): boolean {
-  if (token.length < 2) return false;
-  const thr = token.length <= 4 ? 1 : token.length <= 7 ? 2 : 3;
+// Score d'un token vs le sac de mots : 2 = exact/sous-chaîne, 1 = faute tolérée, 0 = rien.
+function tokenScore(token: string, hay: string[]): number {
+  if (token.length < 2) return 0;
+  const thr = fuzzyThreshold(token.length);
+  let best = 0;
   for (const w of hay) {
     if (w.length < 2) continue;
-    if (w.includes(token) || token.includes(w)) return true;
-    if (lev(token, w) <= thr) return true;
+    if (w === token || w.includes(token) || token.includes(w)) return 2;
+    if (thr > 0 && lev(token, w) <= thr) best = 1;
   }
-  return false;
+  return best;
 }
 
 type Searchable = { firstName: string; lastName: string; languages: string[]; cities: string[] };
+
+// Le « sac de mots » d'un guide : nom + langues (tous libellés) + régions (libellés + alias + valeur brute).
+function haystack(g: Searchable): string[] {
+  return [
+    ...words(g.firstName),
+    ...words(g.lastName),
+    ...g.languages.flatMap((c) => (LANG_LABELS[c] ?? []).flatMap(words)),
+    ...g.cities.flatMap((k) => [k, ...(CITY_LABELS[k] ?? []), ...(CITY_ALIASES[k] ?? [])].flatMap(words)),
+  ];
+}
 
 // Filtre + trie les guides selon la requête libre (nom / langue / région, multi-mots, fautes tolérées).
 export function searchGuides<T extends Searchable>(guides: T[], q: string): T[] {
@@ -71,19 +95,21 @@ export function searchGuides<T extends Searchable>(guides: T[], q: string): T[] 
   if (!tokens.length) return guides;
 
   const scored = guides.map((g) => {
-    const hay = [
-      ...words(g.firstName),
-      ...words(g.lastName),
-      ...g.languages.flatMap((c) => (LANG_LABELS[c] ?? []).flatMap(words)),
-      ...g.cities.flatMap((k) => [k, ...(CITY_LABELS[k] ?? [])].flatMap(words)),
-    ];
-    let score = 0;
-    for (const tk of tokens) if (tokenMatches(tk, hay)) score++;
-    return { g, score };
+    const hay = haystack(g);
+    let matched = 0;
+    let quality = 0;
+    for (const tk of tokens) {
+      const s = tokenScore(tk, hay);
+      if (s > 0) { matched++; quality += s; }
+    }
+    return { g, matched, quality };
   });
 
-  return scored
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score)
+  // Priorité : guides qui matchent TOUS les mots. Repli (si aucun) : ceux qui matchent au moins un.
+  const full = scored.filter((x) => x.matched === tokens.length);
+  const pool = REQUIRE_ALL && full.length ? full : scored.filter((x) => x.matched > 0);
+
+  return pool
+    .sort((a, b) => b.matched - a.matched || b.quality - a.quality)
     .map((x) => x.g);
 }
