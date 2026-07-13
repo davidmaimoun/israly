@@ -30,7 +30,7 @@ export function LanguageSwitcher({ onDark = false }: { onDark?: boolean }) {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <ul className="absolute end-0 z-20 mt-2 w-40 overflow-hidden rounded-2xl border border-stone bg-surface shadow-[var(--shadow-soft)]">
+          <ul className="absolute inset-e-0 z-20 mt-2 w-40 overflow-hidden rounded-2xl border border-stone bg-surface shadow-(--shadow-soft)">
             {locales.map((l) => (
               <li key={l}>
                 <button

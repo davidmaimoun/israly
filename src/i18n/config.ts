@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIG i18n CENTRALE — ajouter une langue = 1 ligne ici + 1 JSON dans /messages
 // ============================================================
-export const locales = ["he", "en", "fr", "ru", "es", "am"] as const;
+export const locales = ["he", "en", "fr"] as const;
 export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = "he";
@@ -14,9 +14,9 @@ export const localeMeta: Record<Locale, { label: string; flag: string }> = {
   he: { label: "עברית", flag: "🇮🇱" },
   en: { label: "English", flag: "🇬🇧" },
   fr: { label: "Français", flag: "🇫🇷" },
-  ru: { label: "Русский", flag: "🇷🇺" },
-  es: { label: "Español", flag: "🇪🇸" },
-  am: { label: "አማርኛ", flag: "🇪🇹" },
+  // ru: { label: "Русский", flag: "🇷🇺" },
+  // es: { label: "Español", flag: "🇪🇸" },
+  // am: { label: "አማርኛ", flag: "🇪🇹" },
 };
 
 export function isRtl(locale: string): boolean {

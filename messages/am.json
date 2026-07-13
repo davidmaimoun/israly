@@ -53,7 +53,7 @@
     "specializes": "ስፔሻሊቲዎች",
     "filtersTitle": "ፍለጋዎን ያጥሩ",
     "reviews": "{count} ግምገማዎች",
-    "fallbackNotice": "No guide covers this region yet — here are all our guides to help you choose."
+    "fallbackNotice": "No guide matches your search yet — here are all our guides to help you choose."
   },
   "guide": {
     "about": "ስለ",

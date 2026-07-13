@@ -1,13 +1,12 @@
 "use client";
 
-
 import { useState, useEffect, useRef, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { createTourRequest } from "@/features/bookings/actions";
 import { CITIES } from "@/lib/cities";
 import { LANGUAGES } from "@/lib/languages";
 import { Button } from "@/components/ui/Button";
-import { Send, Loader2, CalendarCheck, MessageCircle, ChevronDown } from "lucide-react";
+import { Send, Loader2, CalendarCheck, ChevronDown, ArrowRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/config";
 import { WhatsAppIcon } from "../ui/WhatsAppIcon";
@@ -16,21 +15,37 @@ const PLAN_IMAGE = process.env.NEXT_PUBLIC_PLAN_IMAGE || "/img/plan.webp";
 const OWNER_WA = (process.env.NEXT_PUBLIC_WHATSAPP || "").replace(/[^\d]/g, "");
 const REGIONS = CITIES.filter((c) => c !== "all" && c !== "other");
 
+const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+function useIsMobile(bp = 768) {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width:${bp - 1}px)`);
+    const on = () => setM(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, [bp]);
+  return m;
+}
+
 export function PlanVisit() {
   const locale = useLocale() as Locale;
   const t = useTranslations("plan");
   const tb = useTranslations("booking");
   const tc = useTranslations("cities");
   const tl = useTranslations("langs");
+  const isMobile = useIsMobile();
+
   const [pending, start] = useTransition();
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [phoneErr, setPhoneErr] = useState<string | null>(null);
+  const [step, setStep] = useState(0); // 0..2 (mobile only)
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [people, setPeople] = useState("2");
+  const [people, setPeople] = useState("1");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [cities, setCities] = useState<string[]>([]);
@@ -40,11 +55,17 @@ export function PlanVisit() {
   const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
+  const peopleN = Math.max(1, Number(people || 1) || 1);
+
+  // ---- Required fields = step 1 ----
+  const step1Valid = name.trim() !== "" && emailOk(email) && phone.trim() !== "";
+  const canSubmit = step1Valid;
+
   const payload = () => ({
-    clientName: name,
-    clientEmail: email,
-    clientPhone: phone,
-    numPeople: Number(people || 1),
+    clientName: name.trim(),
+    clientEmail: email.trim(),
+    clientPhone: phone.trim(),
+    numPeople: peopleN,
     startDate: date,
     startTime: time,
     cities,
@@ -54,9 +75,8 @@ export function PlanVisit() {
   });
 
   function submit() {
-    setError(null); setPhoneErr(null);
-    if (!name || !email) { setError(tb("error")); return; }
-    if (!phone) { setPhoneErr(tb("phoneRequired")); return; }
+    setError(null);
+    if (!canSubmit) return;
     start(async () => {
       const res = await createTourRequest(payload());
       if (res.ok) setDone(true);
@@ -65,23 +85,103 @@ export function PlanVisit() {
   }
 
   function sendByWhatsapp() {
-    if (!OWNER_WA) return;
-    if (!name || !email) { setError(tb("error")); return; }
-    if (!phone) { setPhoneErr(tb("phoneRequired")); return; }
+    if (!OWNER_WA || !canSubmit) return;
     const body = [
       t("title"),
       "",
       `${tb("name")}: ${name}`,
       `${tb("email")}: ${email}`,
-      phone ? `${tb("phone")}: ${phone}` : null,
-      `${tb("people")}: ${people}`,
+      `${tb("phone")}: ${phone}`,
+      `${tb("people")}: ${peopleN}`,
       date ? `${tb("startDate")}: ${date}${time ? ` ${time}` : ""}` : null,
       cities.length ? `${t("regions")}: ${cities.map((c) => tc(c)).join(", ")}` : null,
       langs.length ? `${t("langs")}: ${langs.map((l) => tl(l)).join(", ")}` : null,
       message ? `${tb("message")}: ${message}` : null,
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
     window.open(`https://wa.me/${OWNER_WA}?text=${encodeURIComponent(body)}`, "_blank", "noopener");
   }
+
+  // ---------- Field groups (shared mobile wizard <-> desktop) ----------
+  const stepCoord = (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="sm:col-span-2">
+        <F label={tb("name")} value={name} onChange={setName} required />
+      </div>
+      <F
+        label={tb("email")}
+        value={email}
+        onChange={setEmail}
+        type="email"
+        required
+        error={email && !emailOk(email) ? tb("emailInvalid") : null}
+      />
+      <F label={tb("phone")} value={phone} onChange={setPhone} required />
+      <F label={tb("people")} value={people} onChange={setPeople} type="number" min={1} />
+    </div>
+  );
+
+  const stepSejour = (
+    <div className="grid gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <F label={t("dateOptional")} value={date} onChange={setDate} type="date" />
+        <F label={tb("time")} value={time} onChange={setTime} type="time" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <PlanDropdown label={t("regions")} placeholder={t("choose")} count={cities.length}>
+          <Chips
+            items={REGIONS.map((c) => ({ value: c, label: tc(c) }))}
+            selected={cities}
+            onToggle={(v) => toggle(cities, setCities, v)}
+          />
+        </PlanDropdown>
+        <PlanDropdown label={t("langs")} placeholder={t("choose")} count={langs.length}>
+          <Chips
+            items={LANGUAGES.map((l) => ({ value: l.code, label: `${l.flag} ${tl(l.code)}` }))}
+            selected={langs}
+            onToggle={(v) => toggle(langs, setLangs, v)}
+          />
+        </PlanDropdown>
+      </div>
+    </div>
+  );
+
+  const stepMessage = (
+    <div>
+      <label className="eyebrow mb-1 block">{t("proposal")}</label>
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        rows={4}
+        className="w-full rounded-xl border border-stone bg-cream/50 px-3 py-2 text-sm outline-none focus:border-primary"
+      />
+    </div>
+  );
+
+  const submitRow = (
+    <div className="grid gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button onClick={submit} size="lg" disabled={pending || !canSubmit} className="w-full sm:flex-1">
+          {pending ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+          {t("submit")}
+        </Button>
+        {OWNER_WA && (
+          <button
+            type="button"
+            onClick={sendByWhatsapp}
+            disabled={!canSubmit}
+            className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 text-base font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-40 sm:flex-1"
+          >
+            <WhatsAppIcon size={20} /> {tb("whatsapp")}
+          </button>
+        )}
+      </div>
+      {error && <p className="text-center text-sm text-danger">{error}</p>}
+    </div>
+  );
+
+  const labels = [t("step1"), t("step2"), t("step3")];
 
   return (
     <section id="plan" className="relative scroll-mt-20 overflow-hidden py-16 md:py-24">
@@ -96,52 +196,61 @@ export function PlanVisit() {
         </div>
 
         {done ? (
-          <div className="rounded-[var(--radius-card)] border border-success/30 bg-success/10 p-8 text-center">
+          <div className="rounded-card border border-success/30 bg-success/10 p-8 text-center">
             <CalendarCheck className="mx-auto mb-2 text-success" />
             <p className="font-medium text-ink">{tb("success")}</p>
           </div>
         ) : (
-          <div className="grid gap-4 rounded-[var(--radius-card)] border border-stone/70 bg-surface p-5 md:p-7">
-            <div className="grid gap-4 md:grid-cols-2">
-              <F label={tb("name")} value={name} onChange={setName} required />
-              <F label={tb("email")} value={email} onChange={setEmail} type="email" required />
-              <F label={tb("phone")} value={phone} onChange={(v) => { setPhone(v); setPhoneErr(null); }} required error={phoneErr} />
-              <F label={tb("people")} value={people} onChange={setPeople} type="number" />
-              <F label={t("dateOptional")} value={date} onChange={setDate} type="date" />
-              <F label={tb("time")} value={time} onChange={setTime} type="time" />
-            </div>
+          <div className="grid gap-5 rounded-card border border-stone/70 bg-surface p-5 md:p-7">
+            {isMobile ? (
+              /* ---------------- MOBILE : wizard 3 steps ---------------- */
+              <>
+                <Steps step={step} labels={labels} onJump={(i) => i < step && setStep(i)} />
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <PlanDropdown label={t("regions")} placeholder={t("choose")} count={cities.length}>
-                <Chips items={REGIONS.map((c) => ({ value: c, label: tc(c) }))} selected={cities} onToggle={(v) => toggle(cities, setCities, v)} />
-              </PlanDropdown>
-              <PlanDropdown label={t("langs")} placeholder={t("choose")} count={langs.length}>
-                <Chips items={LANGUAGES.map((l) => ({ value: l.code, label: `${l.flag} ${tl(l.code)}` }))} selected={langs} onToggle={(v) => toggle(langs, setLangs, v)} />
-              </PlanDropdown>
-            </div>
+                {/* steps 2 & 3 = optionnelles */}
+                {(step === 1 || step === 2) && <OptTag label={t("optional")} />}
 
-            <div>
-              <label className="eyebrow mb-1 block">{t("proposal")}</label>
-              <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} className="w-full rounded-xl border border-stone bg-cream/50 px-3 py-2 text-sm" />
-            </div>
+                <div>
+                  {step === 0 && stepCoord}
+                  {step === 1 && stepSejour}
+                  {step === 2 && stepMessage}
+                </div>
 
-            {error && <p className="text-sm text-danger">{error}</p>}
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button onClick={submit} size="lg" disabled={pending} className="w-full sm:flex-1">
-                {pending ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
-                {t("submit")}
-              </Button>
-              {OWNER_WA && (
-                <button
-                  type="button"
-                  onClick={sendByWhatsapp}
-                  className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 text-base font-semibold text-white sm:flex-1"
-                >
-                  <WhatsAppIcon size={20} /> {tb("whatsapp")}
-                </button>
-              )}
-            </div>
+                {step < 2 ? (
+                  <>
+                    <div className="flex items-center gap-3">
+                      {step > 0 && <BackBtn onClick={() => setStep((s) => s - 1)} label={t("back")} />}
+                      <Button
+                        onClick={() => setStep((s) => s + 1)}
+                        size="lg"
+                        disabled={step === 0 && !step1Valid}
+                        className="flex-1"
+                      >
+                        {t("next")} <ArrowRight size={18} />
+                      </Button>
+                    </div>
+                    {step === 0 && !step1Valid && (
+                      <p className="text-center text-xs text-ink-soft">{t("requiredHint")}</p>
+                    )}
+                  </>
+                ) : (
+                  <div className="grid gap-3">
+                    {submitRow}
+                    <BackBtn onClick={() => setStep((s) => s - 1)} label={t("back")} full />
+                  </div>
+                )}
+              </>
+            ) : (
+              /* ---------------- DESKTOP : tout sur une page ---------------- */
+              <>
+                {stepCoord}
+                <OptSep label={t("optional")} />
+                {stepSejour}
+                {stepMessage}
+                {submitRow}
+                {!canSubmit && <p className="-mt-1 text-center text-xs text-ink-soft">{t("requiredHint")}</p>}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -149,44 +258,168 @@ export function PlanVisit() {
   );
 }
 
-function F({ label, value, onChange, type = "text", required, error }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; error?: string | null }) {
+/* -------------------- Sous-composants -------------------- */
+
+// Séparateur desktop : —— Optionnel ——
+function OptSep({ label }: { label: string }) {
   return (
-    <div>
-      <label className="eyebrow mb-1 block">{label}{required && <span className="text-danger"> *</span>}</label>
-      {error && <p className="mb-1 text-xs font-medium text-danger">{error}</p>}
-      <input type={type} value={value} required={required} min={type === "number" ? 1 : undefined} onChange={(e) => onChange(e.target.value)} className={cn("h-11 w-full rounded-xl border bg-cream/50 px-3 text-sm", error ? "border-danger" : "border-stone")} />
+    <div className="my-1 flex items-center gap-3">
+      <span className="h-px flex-1 bg-stone/60" />
+      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">{label}</span>
+      <span className="h-px flex-1 bg-stone/60" />
     </div>
   );
 }
-function Chips({ items, selected, onToggle }: { items: { value: string; label: string }[]; selected: string[]; onToggle: (v: string) => void }) {
+
+// Badge mobile en tête d'une step optionnelle
+function OptTag({ label }: { label: string }) {
+  return (
+    <span className="inline-flex w-fit items-center rounded-full border border-stone bg-cream/50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft">
+      {label}
+    </span>
+  );
+}
+
+function Steps({ step, labels, onJump }: { step: number; labels: string[]; onJump: (i: number) => void }) {
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
-        {items.map((it) => {
-          const on = selected.includes(it.value);
-          return (
-            <button key={it.value} type="button" onClick={() => onToggle(it.value)} className={cn("rounded-full border px-3 py-1.5 text-sm", on ? "border-primary bg-primary text-white" : "border-stone hover:bg-sand")}>
-              {it.label}
-            </button>
-          );
-        })}
+      <div className="flex gap-2">
+        {labels.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={labels[i]}
+            onClick={() => onJump(i)}
+            className={cn("h-1.5 flex-1 rounded-full transition-colors", i <= step ? "bg-primary" : "bg-stone/40")}
+          />
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-between text-xs">
+        <span className="font-semibold text-primary">{labels[step]}</span>
+        <span className="text-ink-soft">
+          {step + 1}/{labels.length}
+        </span>
       </div>
     </div>
   );
 }
 
-function PlanDropdown({ label, placeholder, count, children }: { label: string; placeholder: string; count: number; children: React.ReactNode }) {
+function BackBtn({ onClick, label, full }: { onClick: () => void; label: string; full?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-12 items-center justify-center gap-1 rounded-full border border-stone px-5 text-sm font-medium text-ink-soft transition hover:bg-sand",
+        full && "w-full"
+      )}
+    >
+      <ArrowLeft size={16} /> {label}
+    </button>
+  );
+}
+
+function F({
+  label,
+  value,
+  onChange,
+  type = "text",
+  required,
+  error,
+  min,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  required?: boolean;
+  error?: string | null;
+  min?: number;
+}) {
+  return (
+    <div>
+      <label className="eyebrow mb-1 block">
+        {label}
+        {required && <span className="text-danger"> *</span>}
+      </label>
+      {error && <p className="mb-1 text-xs font-medium text-danger">{error}</p>}
+      <input
+        type={type}
+        value={value}
+        required={required}
+        min={type === "number" ? min ?? 1 : undefined}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(
+          "h-11 w-full rounded-xl border bg-cream/50 px-3 text-sm outline-none focus:border-primary",
+          error ? "border-danger" : "border-stone"
+        )}
+      />
+    </div>
+  );
+}
+
+function Chips({
+  items,
+  selected,
+  onToggle,
+}: {
+  items: { value: string; label: string }[];
+  selected: string[];
+  onToggle: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((it) => {
+        const on = selected.includes(it.value);
+        return (
+          <button
+            key={it.value}
+            type="button"
+            onClick={() => onToggle(it.value)}
+            className={cn(
+              "rounded-full border px-3 py-1.5 text-sm transition",
+              on ? "border-primary bg-primary text-white" : "border-stone hover:bg-sand"
+            )}
+          >
+            {it.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PlanDropdown({
+  label,
+  placeholder,
+  count,
+  children,
+}: {
+  label: string;
+  placeholder: string;
+  count: number;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
   return (
     <div ref={ref} className="relative">
       <label className="eyebrow mb-1 block">{label}</label>
-      <button type="button" onClick={() => setOpen((v) => !v)} className={cn("flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-cream/50 px-3 text-sm", count ? "border-primary text-primary" : "border-stone text-ink-soft")}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-cream/50 px-3 text-sm",
+          count ? "border-primary text-primary" : "border-stone text-ink-soft"
+        )}
+      >
         <span>{count > 0 ? `${count}` : placeholder}</span>
         <ChevronDown size={16} className={cn("transition-transform", open && "rotate-180")} />
       </button>

@@ -53,7 +53,7 @@
     "specializes": "Spécialités",
     "filtersTitle": "Affiner la recherche",
     "reviews": "{count} avis",
-    "fallbackNotice": "Aucun guide ne couvre encore cette région — voici tous nos guides pour vous aider à choisir."
+    "fallbackNotice": "Aucun guide ne correspond encore à votre recherche — voici tous nos guides pour vous aider à choisir."
   },
   "guide": {
     "about": "À propos",
@@ -82,6 +82,7 @@
   "booking": {
     "name": "Votre nom",
     "email": "Votre email",
+    "emailInvalid": "Adresse e-mail invalide",
     "phone": "Téléphone",
     "people": "Nombre de personnes",
     "message": "Message (optionnel)",
@@ -103,7 +104,7 @@
   "how": {
     "title": "Comment ça marche",
     "step1Title": "Recherchez",
-    "step1Text": "Filtrez les guides par langue et région en quelques secondes.",
+    "step1Text": "Trouvez un guide par nom, langue ou région en quelques secondes.",
     "step2Title": "Choisissez une date",
     "step2Text": "Consultez le calendrier et envoyez votre demande.",
     "step3Title": "Partez",
@@ -401,11 +402,18 @@
     "eyebrow": "Demande libre",
     "title": "Planifiez votre visite",
     "subtitle": "Dites-nous ce qui vous tente — on trouve le bon guide et on revient vers vous.",
-    "regions": "Régions (optionnel)",
+    "step1": "Vos coordonnées",
+    "step2": "Votre séjour",
+    "step3": "Votre message",
+    "regions": "Régions",
     "choose": "Choisir…",
-    "langs": "Langues souhaitées (optionnel)",
-    "dateOptional": "Date souhaitée (optionnel)",
+    "langs": "Langues souhaitées",
+    "dateOptional": "Date souhaitée",
     "proposal": "Décrivez la visite que vous voulez",
-    "submit": "Envoyer ma demande"
+    "submit": "Envoyer ma demande",
+    "next": "Suivant",
+    "back": "Retour",
+    "requiredHint": "Complétez les champs obligatoires pour continuer",
+    "optional": "Optionnel"
   }
 }
