@@ -8,35 +8,28 @@ import { rankEligible, type GuideForRanking, type LeadCriteria } from "@/lib/lea
 const WINDOW_DAYS = 30;
 const OFFER_TTL_HOURS = 3;
 
-// ============================================================
-// ADAPT #1 — Guide Prisma -> forme de ranking.
-// Ajuste les noms de champs (languages/langs, cities/regions, published…).
-// ============================================================
+const isoDate = (dt: Date | null | undefined) => (dt ? new Date(dt).toISOString().slice(0, 10) : null);
+
+// Guide Prisma -> forme de ranking (mappé sur ton modèle Guide réel).
 function toRankingBase(
   g: any,
 ): Omit<GuideForRanking, "wonLast30d" | "lastTwoExpired" | "availableOnDate"> {
   return {
     id: g.id,
-    name: [g.firstName, g.lastName].filter(Boolean).join(" ") || g.name || "—",
+    name: `${g.firstName} ${g.lastName}`.trim(),
     photo: g.photo ?? null,
     phone: g.phone ?? null,
-    langs: g.languages ?? g.langs ?? [],
-    cities: g.cities ?? g.regions ?? [],
-    published: g.published ?? g.isPublished ?? false,
-    certified: g.certified ?? false,
+    langs: g.languages ?? [],
+    cities: g.cities ?? [],
+    published: g.published ?? false,
+    certified: false, // pas de champ certified dans ton schéma (badge masqué)
     rating: g.rating ?? null,
   };
 }
 
-// ============================================================
-// ADAPT #2 — dispo calendrier (WIRÉE sur le modèle Availability du .prisma).
-// Si ton modèle diffère, change (prisma as any).availability + les champs date/status.
-// Sémantique : date non marquée = DISPO par défaut (mets `return false` pour un opt-in strict).
-// ============================================================
-async function availabilityMap(
-  guideIds: string[],
-  date: Date | null,
-): Promise<Map<string, string>> {
+// Dispo calendrier (modèle Availability : { guideId, date, status }).
+// date non marquée = DISPO par défaut. Se remplit quand ton calendrier écrit dans Availability.
+async function availabilityMap(guideIds: string[], date: Date | null): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   if (!date || guideIds.length === 0) return map;
   const start = new Date(date);
@@ -44,18 +37,18 @@ async function availabilityMap(
   const end = new Date(date);
   end.setUTCHours(23, 59, 59, 999);
   try {
-    const slots = await (prisma as any).availability.findMany({
+    const slots = await prisma.availability.findMany({
       where: { guideId: { in: guideIds }, date: { gte: start, lte: end } },
     });
     for (const s of slots) map.set(s.guideId, s.status);
   } catch {
-    // pas de modèle Availability -> on n'applique pas le filtre dispo
+    /* si vide/indispo -> pas de filtre */
   }
   return map;
 }
 
 export async function getRankedGuidesForLead(leadId: string) {
-  const lead = await prisma.booking.findUnique({ where: { id: leadId } }); // ADAPT: modèle
+  const lead = await prisma.booking.findUnique({ where: { id: leadId } });
   if (!lead) return { lead: null, guides: [] as GuideForRanking[] };
 
   const criteria: LeadCriteria = {
@@ -65,14 +58,14 @@ export async function getRankedGuidesForLead(leadId: string) {
   };
   const leadDate = lead.startDate ? new Date(lead.startDate) : null;
 
-  const rawGuides = await prisma.guide.findMany({ where: { published: true } }); // ADAPT
-  const ids = rawGuides.map((g: any) => g.id);
+  const rawGuides = await prisma.guide.findMany({ where: { published: true } });
+  const ids = rawGuides.map((g) => g.id);
 
   const avail = await availabilityMap(ids, leadDate);
   const availFor = (guideId: string): boolean | undefined => {
     if (!leadDate) return undefined;
     const st = avail.get(guideId);
-    if (st === undefined) return true; // non marqué = dispo (ADAPT)
+    if (st === undefined) return true; // non marqué = dispo
     return st === "available";
   };
 
@@ -88,7 +81,7 @@ export async function getRankedGuidesForLead(leadId: string) {
     byGuide.set(o.guideId, arr);
   }
 
-  const guides: GuideForRanking[] = rawGuides.map((g: any) => {
+  const guides: GuideForRanking[] = rawGuides.map((g) => {
     const os = byGuide.get(g.id) ?? [];
     const wonLast30d = os.filter((o) => o.status === "ACCEPTED" && o.offeredAt >= since).length;
     const lastTwo = os.slice(0, 2);
@@ -96,68 +89,79 @@ export async function getRankedGuidesForLead(leadId: string) {
     return { ...toRankingBase(g), availableOnDate: availFor(g.id), wonLast30d, lastTwoExpired };
   });
 
-  return { lead, guides: rankEligible(guides, criteria) };
+  const leadOut = {
+    id: lead.id,
+    clientName: lead.clientName,
+    clientEmail: lead.clientEmail,
+    clientPhone: lead.clientPhone ?? "",
+    numPeople: lead.numPeople,
+    startDate: isoDate(lead.startDate),
+    startTime: lead.startTime ?? null,
+    cities: lead.cities ?? [],
+    langs: lead.langs ?? [],
+    message: lead.message ?? null,
+    leadStatus: lead.leadStatus ?? "NEW",
+    soldToGuideId: lead.soldToGuideId ?? null,
+  };
+
+  return { lead: leadOut, guides: rankEligible(guides, criteria) };
 }
 
-// Liste des leads récents pour l'admin (pour cliquer vers le dispatch).
+// Liste des leads récents pour l'admin.
 export async function getRecentLeads(limit = 40) {
-  const leads = await prisma.booking.findMany({
-    orderBy: { createdAt: "desc" }, // ADAPT si pas de createdAt
-    take: limit,
-  });
-  return leads.map((l: any) => ({
+  const leads = await prisma.booking.findMany({ orderBy: { createdAt: "desc" }, take: limit });
+  return leads.map((l) => ({
     id: l.id,
     clientName: l.clientName,
     cities: l.cities ?? [],
     langs: l.langs ?? [],
     numPeople: l.numPeople,
-    startDate: l.startDate ?? null,
-    leadStatus: l.leadStatus ?? "NEW",
+    startDate: isoDate(l.startDate),
+    leadStatus: (l.leadStatus ?? "NEW") as string,
     guideId: l.guideId ?? null,
-    createdAt: l.createdAt ?? null,
   }));
 }
 
-// ---- Dashboard guide : ses offres (SANS contact) + ses leads gagnés (AVEC contact) ----
+// Dashboard guide : offres (SANS contact) + leads gagnés (AVEC contact).
 export async function getGuideLeads(guideId: string) {
   const now = new Date();
   const offers = await prisma.leadOffer.findMany({
     where: { guideId },
     orderBy: { offeredAt: "desc" },
-    include: { tourRequest: true },
+    include: { booking: true },
   });
 
   const pending = offers
     .filter((o) => o.status === "OFFERED" && (!o.expiresAt || o.expiresAt > now))
     .map((o) => {
-      const r: any = o.tourRequest;
+      const r = o.booking;
       return {
         offerId: o.id,
-        leadId: o.tourRequestId,
+        leadId: o.bookingId,
         cities: r.cities ?? [],
         langs: r.langs ?? [],
         numPeople: r.numPeople,
-        startDate: r.startDate ?? null,
+        startDate: isoDate(r.startDate),
         startTime: r.startTime ?? null,
         message: r.message ?? null,
         expiresAt: o.expiresAt ?? null,
-        // ⚠️ AUCUN contact client ici (lead non payé)
+        // ⚠️ aucun contact client (lead non payé)
       };
     });
 
   const won = offers
     .filter((o) => o.status === "ACCEPTED")
     .map((o) => {
-      const r: any = o.tourRequest;
+      const r = o.booking;
       return {
-        leadId: o.tourRequestId,
+        leadId: o.bookingId,
         clientName: r.clientName,
-        clientPhone: r.clientPhone,
+        clientPhone: r.clientPhone ?? "",
         clientEmail: r.clientEmail,
         cities: r.cities ?? [],
         langs: r.langs ?? [],
         numPeople: r.numPeople,
-        startDate: r.startDate ?? null,
+        startDate: isoDate(r.startDate),
         startTime: r.startTime ?? null,
         message: r.message ?? null,
         wonAt: o.respondedAt ?? o.offeredAt,
@@ -167,31 +171,22 @@ export async function getGuideLeads(guideId: string) {
   return { pending, won };
 }
 
-// Propose le lead à un guide (log l'offre + fenêtre d'expiration).
 export async function offerLead(leadId: string, guideId: string) {
   const expiresAt = new Date(Date.now() + OFFER_TTL_HOURS * 3600e3);
-  await prisma.leadOffer.create({
-    data: { tourRequestId: leadId, guideId, status: "OFFERED", expiresAt },
-  });
+  await prisma.leadOffer.create({ data: { bookingId: leadId, guideId, status: "OFFERED", expiresAt } });
   await prisma.booking.update({ where: { id: leadId }, data: { leadStatus: "OFFERING" } });
-  revalidatePath(`/admin/leads/${leadId}`); // ADAPT: ton chemin de route
+  revalidatePath(`/admin/leads/${leadId}`);
 }
 
-// Le guide prend + paie -> il devient LE seul (exclusif). Révèle le contact.
 export async function sellLead(leadId: string, guideId: string) {
   const open = await prisma.leadOffer.findFirst({
-    where: { tourRequestId: leadId, guideId, status: "OFFERED" },
+    where: { bookingId: leadId, guideId, status: "OFFERED" },
     orderBy: { offeredAt: "desc" },
   });
   if (open) {
-    await prisma.leadOffer.update({
-      where: { id: open.id },
-      data: { status: "ACCEPTED", respondedAt: new Date() },
-    });
+    await prisma.leadOffer.update({ where: { id: open.id }, data: { status: "ACCEPTED", respondedAt: new Date() } });
   } else {
-    await prisma.leadOffer.create({
-      data: { tourRequestId: leadId, guideId, status: "ACCEPTED", respondedAt: new Date() },
-    });
+    await prisma.leadOffer.create({ data: { bookingId: leadId, guideId, status: "ACCEPTED", respondedAt: new Date() } });
   }
   await prisma.booking.update({
     where: { id: leadId },
@@ -200,17 +195,13 @@ export async function sellLead(leadId: string, guideId: string) {
   revalidatePath(`/admin/leads/${leadId}`);
 }
 
-// "Sans réponse / passe" -> expire l'offre ouverte, on descend au suivant.
 export async function passLead(leadId: string, guideId: string) {
   const open = await prisma.leadOffer.findFirst({
-    where: { tourRequestId: leadId, guideId, status: "OFFERED" },
+    where: { bookingId: leadId, guideId, status: "OFFERED" },
     orderBy: { offeredAt: "desc" },
   });
   if (open) {
-    await prisma.leadOffer.update({
-      where: { id: open.id },
-      data: { status: "EXPIRED", respondedAt: new Date() },
-    });
+    await prisma.leadOffer.update({ where: { id: open.id }, data: { status: "EXPIRED", respondedAt: new Date() } });
   }
   revalidatePath(`/admin/leads/${leadId}`);
 }

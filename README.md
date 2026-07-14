@@ -27,10 +27,11 @@ messages/
 ## Étapes
 
 1. **Prisma** — colle le contenu de `prisma/lead-additions.prisma` dans ton
-   `schema.prisma`, ajoute les champs commentés dans `TourRequest` et `Guide`,
-   puis `npx prisma db push && npx prisma generate`.
-   - Le modèle `Availability` est **optionnel** : si tu as déjà ta feature
-     calendrier, ne l'ajoute pas et mappe juste les noms dans `actions.ts`.
+   `schema.prisma` (enums + `LeadOffer`), ajoute les champs commentés dans
+   `Booking` et `Guide`, puis `npx prisma db push && npx prisma generate`.
+   - `Availability` est déjà dans ton schéma : **ne le re-colle pas**.
+   - Vérifie ensuite : `grep -n "model LeadOffer" prisma/schema.prisma` doit
+     renvoyer une ligne, sinon `prisma.leadOffer` n'existera pas.
 
 2. **Messages** — remplace tes `messages/{fr,he,en}.json` (ou merge les blocs
    `booking` + `plan` si tu as édité entre-temps). Langues parlées (`langs`) intactes.
@@ -50,16 +51,19 @@ messages/
 5. **Seed** (optionnel) — `npx tsx prisma/seed-leads.ts`. Il affiche l'URL du
    lead vitrine à dispatcher. Ré-exécutable (nettoie les leads `@seed.local`).
 
-## Points ADAPT (tous regroupés, ~10 min)
+## Points ADAPT — il n'en reste que 2
+
+Le reste est déjà mappé sur ton schéma (`Booking`, `Guide.languages/cities/published/rating`,
+`prisma` depuis `@/lib/db`, `LeadOffer.bookingId`, `startDate` DateTime).
 
 | Fichier | Quoi |
 |---|---|
-| `features/leads/actions.ts` | #1 `toRankingBase()` : mappe les champs Guide (languages/langs, cities/regions, published, certified, rating, name). |
-| `features/leads/actions.ts` | #2 bloc `availabilityMap()` : mappe ton modèle de dispo (ou laisse — non bloquant). |
-| `features/leads/actions.ts` | `import { prisma }`, noms de modèles `tourRequest`/`guide`, `revalidatePath`. |
-| `features/bookings/actions.ts` | ajoute `guideId` au create de ton `createTourRequest` pour persister la demande ciblée. |
-| `app/.../my-leads/page.tsx` | récupère `guideId` du guide connecté depuis ta session Auth.js. |
-| `prisma/seed-leads.ts` | si `startDate` est un `DateTime` (pas String) ou champs requis manquants. |
+| `features/bookings/actions.ts` | dans ton `createTourRequest`, passe `guideId` au `prisma.booking.create` (le form l'envoie déjà). |
+| `app/.../my-leads/page.tsx` | récupère l'`id` du guide connecté depuis ta session Auth.js (ligne `const guideId = ""`). |
+
+Note : `Booking.startDate` est **requis** dans ton schéma. Une demande générale
+sans date doit donc recevoir une date par défaut dans ton `createTourRequest`
+(ou rends `startDate` optionnel si tu veux de vrais leads sans date).
 
 ## Rappels de conception
 
