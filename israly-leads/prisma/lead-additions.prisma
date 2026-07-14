@@ -1,0 +1,53 @@
+// ============================================================
+// AJOUTS système de leads (cascade) — MAPPÉS SUR TON SCHÉMA RÉEL (Booking / Guide).
+// Colle ce fichier dans schema.prisma, ajoute les champs marqués dans Booking + Guide,
+// puis :  npx prisma db push && npx prisma generate
+// (Availability est DÉJÀ dans ton schéma — ne le re-colle pas.)
+// ============================================================
+
+enum LeadStatus {
+  NEW        // demande reçue, pas encore dispatchée
+  OFFERING   // offre(s) en cours dans la cascade
+  SOLD       // attribuée à un guide
+  CANCELLED  // annulée (guide se désiste / client annule)
+}
+
+enum OfferStatus {
+  OFFERED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model LeadOffer {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId   String      @db.ObjectId
+  booking     Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  guideId     String      @db.ObjectId
+  guide       Guide       @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  status      OfferStatus @default(OFFERED)
+  offeredAt   DateTime    @default(now())
+  expiresAt   DateTime?
+  respondedAt DateTime?
+
+  @@index([guideId, status])
+  @@index([bookingId])
+}
+
+// ============================================================
+// À AJOUTER dans ton `model Booking { … }` (champs optionnels =>
+// pas de casse sur tes bookings existants) :
+//
+//   leadStatus      LeadStatus? @default(NEW)
+//   soldToGuideId   String?     @db.ObjectId   // scalaire simple, pas de relation
+//   soldAt          DateTime?
+//   leadPriceAgorot Int?                        // 40₪ = 4000. Optionnel au MVP.
+//   offers          LeadOffer[]
+//
+// À AJOUTER dans ton `model Guide { … }` :
+//
+//   leadOffers LeadOffer[]
+//
+// (Rien d'autre à toucher : `guideId`/`guide` existe déjà pour la demande ciblée,
+//  et on n'ajoute PAS de relation soldToGuide -> aucun conflit de relations.)
+// ============================================================
