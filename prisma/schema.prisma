@@ -30,9 +30,9 @@ type MediaItem {
 
 /// Tarif d'un circuit nommé : REMPLACE le tarif global pour ce trip.
 type TripPrice {
-  label    String // nom du circuit (ex: "Vieille ville — journée")
-  price    Float
-  unit     String // "perPerson" | "perGroup" | "perHour" | "perPersonHour"
+  label     String // nom du circuit (ex: "Vieille ville — journée")
+  price     Float
+  unit      String // "perPerson" | "perGroup" | "perHour" | "perPersonHour"
   duration  Float? // durée en heures (optionnel)
   details   String? // programme texte libre (fallback / legacy)
   itinerary String? // itinéraire structuré (JSON: ItineraryStop[])
@@ -79,7 +79,7 @@ model Guide {
   specialties     String[] // history/desert/food/religion/hiking/photography...
   yearsExperience Int           @default(0)
   toursCompleted  Int           @default(0)
-  phone           String?       // contact (visible admin uniquement)
+  phone           String? // contact (visible admin uniquement)
   bio             LocalizedText
   notes           String[]      @default([]) // infos pratiques -> pills sur le profil
   gallery         MediaItem[] // galerie photos/vidéos
@@ -90,16 +90,17 @@ model Guide {
   pricePerGroup      Float? // tarif global forfaitaire par groupe
   trips              TripPrice[] // tarifs par circuit (remplacent le global)
 
-  rating          Float?        // note moyenne /5 (optionnel)
-  ratingCount     Int           @default(0)
+  rating      Float? // note moyenne /5 (optionnel)
+  ratingCount Int    @default(0)
 
-  published       Boolean       @default(false)
-  createdAt       DateTime      @default(now())
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   availability Availability[]
   bookings     Booking[]
   invoices     Invoice[]
   user         User?
+  leadOffers   LeadOffer[]
 
   @@index([cities])
   @@index([published])
@@ -117,27 +118,28 @@ model Availability {
 }
 
 model Booking {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  guideId     String?       @db.ObjectId // null = demande générale (gérée par l'admin)
-  guide       Guide?        @relation(fields: [guideId], references: [id], onDelete: Cascade)
-  startDate   DateTime
-  endDate     DateTime?
-  clientName  String
-  clientEmail String
-  clientPhone String?
-  numPeople   Int           @default(1)
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  guideId       String?       @db.ObjectId // null = demande générale (gérée par l'admin)
+  guide         Guide?        @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  startDate     DateTime
+  endDate       DateTime?
+  clientName    String
+  clientEmail   String
+  clientPhone   String?
+  numPeople     Int           @default(1)
   startTime     String? // heure souhaitée, ex "09:00"
   preferredLang String? // langue préférée (réservation guide)
-  cities      String[]      @default([]) // régions d'intérêt (demande générale)
-  langs       String[]      @default([]) // langues souhaitées (demande générale)
-  message     String?
-  locale      String        @default("he")
-  status      BookingStatus @default(PENDING)
-  amount      Float? // champs paiement présents mais inutilisés (flux manuel)
-  paid        Boolean       @default(false)
-  createdAt   DateTime      @default(now())
+  cities        String[]      @default([]) // régions d'intérêt (demande générale)
+  langs         String[]      @default([]) // langues souhaitées (demande générale)
+  message       String?
+  locale        String        @default("he")
+  status        BookingStatus @default(PENDING)
+  amount        Float? // champs paiement présents mais inutilisés (flux manuel)
+  paid          Boolean       @default(false)
+  createdAt     DateTime      @default(now())
 
-  invoices    Invoice[]
+  invoices   Invoice[]
+  leadOffers LeadOffer[]
 
   @@index([guideId, status])
 }
