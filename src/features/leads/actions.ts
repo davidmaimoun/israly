@@ -55,7 +55,7 @@ async function availabilityMap(
 }
 
 export async function getRankedGuidesForLead(leadId: string) {
-  const lead = await prisma.tourRequest.findUnique({ where: { id: leadId } }); // ADAPT: modèle
+  const lead = await prisma.booking.findUnique({ where: { id: leadId } }); // ADAPT: modèle
   if (!lead) return { lead: null, guides: [] as GuideForRanking[] };
 
   const criteria: LeadCriteria = {
@@ -101,7 +101,7 @@ export async function getRankedGuidesForLead(leadId: string) {
 
 // Liste des leads récents pour l'admin (pour cliquer vers le dispatch).
 export async function getRecentLeads(limit = 40) {
-  const leads = await prisma.tourRequest.findMany({
+  const leads = await prisma.booking.findMany({
     orderBy: { createdAt: "desc" }, // ADAPT si pas de createdAt
     take: limit,
   });
@@ -173,7 +173,7 @@ export async function offerLead(leadId: string, guideId: string) {
   await prisma.leadOffer.create({
     data: { tourRequestId: leadId, guideId, status: "OFFERED", expiresAt },
   });
-  await prisma.tourRequest.update({ where: { id: leadId }, data: { leadStatus: "OFFERING" } });
+  await prisma.booking.update({ where: { id: leadId }, data: { leadStatus: "OFFERING" } });
   revalidatePath(`/admin/leads/${leadId}`); // ADAPT: ton chemin de route
 }
 
@@ -193,7 +193,7 @@ export async function sellLead(leadId: string, guideId: string) {
       data: { tourRequestId: leadId, guideId, status: "ACCEPTED", respondedAt: new Date() },
     });
   }
-  await prisma.tourRequest.update({
+  await prisma.booking.update({
     where: { id: leadId },
     data: { leadStatus: "SOLD", soldToGuideId: guideId, soldAt: new Date() },
   });

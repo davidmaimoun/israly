@@ -18,11 +18,11 @@ const ago = (days: number) => new Date(Date.now() - days * 864e5);
 
 async function main() {
   // 1) Nettoyage des leads de seed précédents
-  const old = await prisma.tourRequest.findMany({ where: { clientEmail: { contains: "@seed.local" } } });
+  const old = await prisma.booking.findMany({ where: { clientEmail: { contains: "@seed.local" } } });
   if (old.length) {
     const ids = old.map((l: any) => l.id);
     await prisma.leadOffer.deleteMany({ where: { tourRequestId: { in: ids } } });
-    await prisma.tourRequest.deleteMany({ where: { id: { in: ids } } });
+    await prisma.booking.deleteMany({ where: { id: { in: ids } } });
     console.log(`🧹 supprimé ${old.length} lead(s) de seed précédents`);
   }
 
@@ -37,7 +37,7 @@ async function main() {
 
   const mk = async (data: any, label: string) => {
     try {
-      const l = await prisma.tourRequest.create({ data: { ...base, ...data } });
+      const l = await prisma.booking.create({ data: { ...base, ...data } });
       console.log(`✅ ${label} -> ${l.id}`);
       return l;
     } catch (e: any) {
