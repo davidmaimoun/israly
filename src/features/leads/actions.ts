@@ -1,7 +1,7 @@
 "use server";
 
 // features/leads/actions.ts
-import { prisma } from "@/lib/prisma"; // ADAPT: chemin de ton client Prisma
+import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { rankEligible, type GuideForRanking, type LeadCriteria } from "@/lib/leads/eligibility";
 
