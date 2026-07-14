@@ -138,6 +138,12 @@ model Booking {
   paid          Boolean       @default(false)
   createdAt     DateTime      @default(now())
 
+  // ----- Leads (cascade) -----
+  leadStatus      LeadStatus? @default(NEW)
+  soldToGuideId   String?     @db.ObjectId
+  soldAt          DateTime?
+  leadPriceAgorot Int?
+
   invoices   Invoice[]
   leadOffers LeadOffer[]
 
