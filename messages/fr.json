@@ -414,6 +414,10 @@
     "next": "Suivant",
     "back": "Retour",
     "requiredHint": "Complétez les champs obligatoires pour continuer",
-    "optional": "Optionnel"
+    "optional": "Optionnel",
+    "guidePref": "Un guide en particulier ?",
+    "guideAny": "Aucun — trouvez pour moi",
+    "guideSearch": "Rechercher un guide…",
+    "remove": "Retirer"
   }
 }

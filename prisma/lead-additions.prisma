@@ -1,0 +1,73 @@
+// ============================================================
+// AJOUTS système de leads (cascade) — à MERGER dans schema.prisma
+// Style Prisma + MongoDB. Ajuste "TourRequest" / "Guide" si tes modèles
+// portent d'autres noms.
+// ============================================================
+
+enum LeadStatus {
+  NEW        // demande reçue, pas encore dispatchée
+  OFFERING   // offre(s) en cours dans la cascade
+  SOLD       // attribuée à un guide
+  CANCELLED  // annulée (guide se désiste / client annule)
+}
+
+enum OfferStatus {
+  OFFERED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+// ---- À AJOUTER dans ton modèle TourRequest (ou Booking) ----
+//   guideId         String?      @db.ObjectId   // demande pour un guide précis (via le form)
+//   guide           Guide?       @relation("SpecificRequests", fields: [guideId], references: [id])
+//   leadStatus      LeadStatus   @default(NEW)
+//   soldToGuideId   String?      @db.ObjectId
+//   soldToGuide     Guide?       @relation("SoldLeads", fields: [soldToGuideId], references: [id])
+//   soldAt          DateTime?
+//   leadPriceAgorot Int?         // prix du lead en agorot (40₪ = 4000). Optionnel au MVP.
+//   offers          LeadOffer[]
+
+// ---- À AJOUTER dans ton modèle Guide ----
+//   leadOffers       LeadOffer[]
+//   soldLeads        TourRequest[] @relation("SoldLeads")
+//   specificRequests TourRequest[] @relation("SpecificRequests")
+//   availability     Availability[]   // si tu utilises le modèle ci-dessous
+
+model LeadOffer {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  tourRequestId String      @db.ObjectId
+  tourRequest   TourRequest @relation(fields: [tourRequestId], references: [id], onDelete: Cascade)
+  guideId       String      @db.ObjectId
+  guide         Guide       @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  status        OfferStatus @default(OFFERED)
+  offeredAt     DateTime    @default(now())
+  expiresAt     DateTime?
+  respondedAt   DateTime?
+
+  @@index([guideId, status])
+  @@index([tourRequestId])
+}
+
+// ============================================================
+// OPTIONNEL — modèle de dispo calendrier.
+// ⚠️ Tu en as probablement DÉJÀ un (ta feature "calendrier des dispos").
+//    Si oui : NE l'ajoute PAS, mappe juste les noms de champs dans
+//    features/leads/actions.ts (bloc dispo). Sinon, ce modèle marche avec le seed.
+// status ∈ "available" | "booked" | "unavailable"
+// ============================================================
+model Availability {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  guideId String   @db.ObjectId
+  guide   Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  date    DateTime
+  status  String   @default("available")
+
+  @@unique([guideId, date])
+  @@index([guideId])
+}
+
+// Notes :
+// • Le "compteur de leads par guide" n'est PAS un champ : il se calcule depuis
+//   les LeadOffer ACCEPTED (source de vérité, jamais désynchronisée).
+// • La réactivité (2 dernières offres expirées) se lit aussi ici.

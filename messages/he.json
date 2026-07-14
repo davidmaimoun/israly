@@ -414,6 +414,10 @@
     "next": "הבא",
     "back": "חזרה",
     "requiredHint": "מלאו את שדות החובה כדי להמשיך",
-    "optional": "לא חובה"
+    "optional": "לא חובה",
+    "guidePref": "מדריך מסוים?",
+    "guideAny": "אין — תמצאו עבורי",
+    "guideSearch": "חיפוש מדריך…",
+    "remove": "הסר"
   }
 }

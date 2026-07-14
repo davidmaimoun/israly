@@ -414,6 +414,10 @@
     "next": "Next",
     "back": "Back",
     "requiredHint": "Fill in the required fields to continue",
-    "optional": "Optional"
+    "optional": "Optional",
+    "guidePref": "A specific guide?",
+    "guideAny": "None — find one for me",
+    "guideSearch": "Search a guide…",
+    "remove": "Remove"
   }
 }
